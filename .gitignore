@@ -1,8 +1,9 @@
 # Node modules
 node_modules/
 
-# Build output
-build/
+# Build output (ignore everything except script.lua)
+build/*
+!build/script.lua
 
 # OS files
 .DS_Store
