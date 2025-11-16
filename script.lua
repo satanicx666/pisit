@@ -647,8 +647,8 @@ else
         v8.notifConnections = {};
     end;
     local v137 = loadstring(game:HttpGet("https://raw.githubusercontent.com/TesterX14/XXXX/refs/heads/main/Library"))():Window({
-        Title = "Chloe X |", 
-        Footer = "Version 1.0.6", 
+        Title = "ZiVi Hub |", 
+        Footer = "Version 1.0.0", 
         Image = "132435516080103", 
         Color = Color3.fromRGB(0, 208, 255), 
         Theme = 9542022979, 
