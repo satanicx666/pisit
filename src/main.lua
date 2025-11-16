@@ -4,14 +4,13 @@
     This is the entry point for the script.
     When bundled, this file will be executed last.
 
-    Build Date: Will be replaced by bundler
-    Version: 2.0.0
+    Version: 2.0.0 (Refactored)
 ]]
 
--- Load core services
-local Services = require("src/core/services")
+-- ============================================
+-- EXECUTOR COMPATIBILITY CHECK
+-- ============================================
 
--- Check executor compatibility
 local httpRequest = syn and syn.request
     or http and http.request
     or http_request
@@ -25,36 +24,89 @@ end
 
 _G.httpRequest = httpRequest
 
--- Wait for character
+-- ============================================
+-- LOAD CORE MODULES
+-- ============================================
+
+local Services = require("src/core/services")
+local Constants = require("src/core/constants")
+local State = require("src/core/state")
+
+-- ============================================
+-- LOAD NETWORK MODULES
+-- ============================================
+
+local Events = require("src/network/events")
+local Functions = require("src/network/functions")
+local Webhook = require("src/network/webhook")
+
+-- ============================================
+-- LOAD UTILITY MODULES
+-- ============================================
+
+local PlayerUtils = require("src/utils/player-utils")
+
+-- ============================================
+-- WAIT FOR CHARACTER
+-- ============================================
+
 local LocalPlayer = Services.LocalPlayer
 if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-    print("[INFO] Waiting for character...")
     LocalPlayer.CharacterAdded:Wait():WaitForChild("HumanoidRootPart")
 end
 
--- Initialize
+-- ============================================
+-- INITIALIZE GLOBALS
+-- ============================================
+
+_G.Celestial = _G.Celestial or {}
+_G.Celestial.DetectorCount = _G.Celestial.DetectorCount or 0
+_G.Celestial.InstantCount = _G.Celestial.InstantCount or 0
+_G.TierFish = Constants.TIER_FISH
+_G.Variant = Constants.VARIANTS
+
+-- ============================================
+-- STARTUP MESSAGE
+-- ============================================
+
 print("╔═══════════════════════════════════════════════════╗")
-print("║        Roblox FishIt Script - Modular Demo       ║")
+print("║        Roblox FishIt Script - Refactored         ║")
+print("║                  Version 2.0.0                    ║")
 print("╚═══════════════════════════════════════════════════╝")
 print("")
-print("[INFO] Script loaded successfully!")
-print("[INFO] Player:", LocalPlayer.Name)
-print("[INFO] Executor:", httpRequest and "Compatible" or "Not supported")
+print("✅ Core modules loaded:")
+print("   - Services ✓")
+print("   - Constants ✓")
+print("   - State ✓")
 print("")
-print("📦 This is a demo of the modular build system.")
-print("📝 See CLAUDE.md for full refactoring roadmap.")
+print("✅ Network modules loaded:")
+print("   - Events ✓")
+print("   - Functions ✓")
+print("   - Webhook ✓")
 print("")
+print("✅ Utility modules loaded:")
+print("   - PlayerUtils ✓")
+print("")
+print("👤 Player:", LocalPlayer.Name)
+print("🔧 Executor: Compatible")
+print("")
+print("⚠️  Feature modules not yet implemented!")
+print("📝 This is Phase 1 of refactoring (Core + Network)")
+print("")
+print("Next: Add feature modules (fishing, selling, trading, etc.)")
+print("See CLAUDE.md for roadmap.")
 
--- Example: Access services
-print("✅ Services loaded:")
-print("   - Players:", Services.Players)
-print("   - RunService:", Services.RunService)
-print("   - HttpService:", Services.HttpService)
+-- ============================================
+-- TODO: LOAD FEATURE MODULES
+-- ============================================
 
--- Placeholder for future modules
+-- Phase 3: Load feature modules here when implemented
+
+-- ============================================
+-- TODO: LOAD UI MODULES
+-- ============================================
+
+-- Phase 4: Load UI modules here when implemented
+
 print("")
-print("⚠️  To add more features, follow the steps in CLAUDE.md")
-print("   Phase 1: Core modules")
-print("   Phase 2: Network layer")
-print("   Phase 3: Features")
-print("   Phase 4: UI")
+print("🎯 Script initialization complete!")
