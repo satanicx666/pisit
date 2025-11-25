@@ -13,7 +13,7 @@
 
 ### Complete Modular Architecture
 ```
-18 Modules | 2,124 Lines | 62.85 KB Bundle
+22 Modules | 3,252 Lines | 96.40 KB Bundle
 ```
 
 #### 📁 Module Breakdown:
@@ -28,23 +28,29 @@
 - `functions.lua` - Remote Functions (InvokeServer)
 - `webhook.lua` - Discord webhook integration
 
+**Data Modules (1):**
+- `models.lua` - Data access layer (Replion, ItemUtility, PlayerStatsUtility)
+
 **Utility Modules (1):**
 - `player-utils.lua` - Player helper functions
 
-**Feature Modules (4):**
+**Feature Modules (7):**
 - `instant-fish.lua` - Auto fishing
 - `auto-sell.lua` - Auto selling
 - `auto-favorite.lua` - Auto favoriting
 - `teleport.lua` - Teleportation system
+- `auto-trade.lua` - Trading automation (NEW!)
+- `trade-filters.lua` - Trade filter utilities (NEW!)
 
 **Config Modules (1):**
 - `locations.lua` - 25+ fishing locations
 
-**UI Modules (5):**
+**UI Modules (6):**
 - `library.lua` - UI library loader (Discord theme)
 - `main-window.lua` - Window manager
 - `fish-tab.lua` - Fishing controls
 - `auto-tab.lua` - Automation controls
+- `trade-tab.lua` - Trading controls (NEW!)
 - `misc-tab.lua` - Misc features
 
 **Entry Point (1):**
@@ -73,7 +79,14 @@
    - Auto favorite (name/rarity/variant filters)
    - Unfavorite all button
 
-3. **Misc** 🌍
+3. **Trading** 💎 (NEW!)
+   - Trade by Name (specific items)
+   - Trade by Coin (target coin value)
+   - Trade by Rarity (Common → Secret)
+   - Auto accept trade requests
+   - Real-time progress monitoring
+
+4. **Misc** 🌍
    - Teleport to 25+ locations
    - Position save/load
    - Discord webhook setup
@@ -150,6 +163,16 @@ npm run dev
 - Auto-teleport on respawn
 - Clear saved position
 
+### 💎 Trading System (NEW!)
+- **Trade by Name:** Send specific fish/items by name
+- **Trade by Coin:** Auto-select fish to reach target coin value
+- **Trade by Rarity:** Send all fish of specific rarity
+- **Auto Accept:** Automatically accept incoming trade requests
+- Real-time monitoring panels for each trade mode
+- Retry mechanism (up to 3 attempts)
+- Player list refresh
+- Success/fail tracking
+
 ### 📡 Discord Webhooks
 - Fish caught notifications
 - Disconnect alerts
@@ -213,10 +236,15 @@ git push origin main
 - **Lines:** 1,470 (+816)
 - **Size:** 43.90 KB (+22.39 KB)
 
-### Phase 3: UI (Final)
+### Phase 3: UI & Rebranding
 - **Modules:** 18 (+5)
 - **Lines:** 2,124 (+654)
 - **Size:** 62.85 KB (+18.95 KB)
+
+### Phase 4: Trading System (NEW!)
+- **Modules:** 22 (+4)
+- **Lines:** 3,252 (+1,128)
+- **Size:** 96.40 KB (+33.55 KB)
 
 ---
 
@@ -311,9 +339,10 @@ You successfully:
 ### Final Stats:
 ```
 🎯 100% Complete
-📦 18 Modules
-📝 2,124 Lines
+📦 22 Modules
+📝 3,252 Lines
 🎨 Discord Dark Theme
+💎 Trading System Included
 ⚡ Production Ready
 ```
 

@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0 BETA] - 2025-11-26
+
+### 🎁 Major Update - Trading System
+
+#### Added
+- **💎 Complete Trading System**
+  - Trade by Name: Send specific fish/items by name
+  - Trade by Coin: Auto-select fish to reach target coin value
+  - Trade by Rarity: Send all fish of specific rarity (Common → Secret)
+  - Auto Accept: Automatically accept incoming trade requests
+  - Real-time monitoring panels for each trade mode
+  - Retry mechanism (up to 3 attempts per trade)
+  - Player list refresh functionality
+  - Success/fail tracking
+
+- **New Modules**
+  - `auto-trade.lua`: Core trading automation logic
+  - `trade-filters.lua`: Trade filtering and item selection utilities
+  - `trade-tab.lua`: Trading UI with Discord theme
+  - `models.lua`: Data access layer (Replion, ItemUtility, PlayerStatsUtility)
+
+- **UI Improvements**
+  - New "Trading" tab with 3 sub-sections:
+    - Trade by Name (item-specific trading)
+    - Trade by Coin (value-based trading)
+    - Trade by Rarity (rarity-based trading)
+  - Real-time progress monitoring panels
+  - Color-coded status indicators (blue=sending, green=complete, red=error)
+
+#### Technical Details
+- **Modules:** 22 (was 18, +4 new)
+- **Lines:** 3,252 (was 2,124, +1,128)
+- **Bundle Size:** 96.40 KB (was 62.85 KB, +33.55 KB)
+- Build time: ~1 second
+
+---
+
 ## [1.0.0 BETA] - 2024-11-17
 
 ### 🎉 Initial Release - Complete Refactoring
@@ -73,7 +110,10 @@ All notable changes to this project will be documented in this file.
 - None reported yet
 
 ## Future Plans
-- [ ] Add more automation features (trading, events, enchanting)
+- [x] ~~Add trading automation~~ ✅ Completed in v2.0.0
+- [ ] Add auto events system
+- [ ] Add enchanting automation
+- [ ] Add Kaitun mode (full automation)
 - [ ] Add more UI customization options
 - [ ] Add config save/load system
 - [ ] Add auto-update system

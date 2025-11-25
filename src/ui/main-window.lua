@@ -11,6 +11,7 @@
 local Library = require("src/ui/library")
 local FishTab = require("src/ui/tabs/fish-tab")
 local AutoTab = require("src/ui/tabs/auto-tab")
+local TradeTab = require("src/ui/tabs/trade-tab")
 local MiscTab = require("src/ui/tabs/misc-tab")
 
 local MainWindow = {}
@@ -47,6 +48,11 @@ function MainWindow.create()
         Icon = "settings"
     })
 
+    tabs.trade = window:AddTab({
+        Name = "Trading",
+        Icon = "shuffle"
+    })
+
     tabs.misc = window:AddTab({
         Name = "Misc",
         Icon = "wrench"
@@ -55,6 +61,7 @@ function MainWindow.create()
     -- Setup tabs
     FishTab.setup(tabs.fish)
     AutoTab.setup(tabs.auto)
+    TradeTab.setup(tabs.trade)
     MiscTab.setup(tabs.misc)
 
     print("[MainWindow] All tabs initialized")
