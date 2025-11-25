@@ -2,7 +2,7 @@
     ╔═══════════════════════════════════════════════════╗
     ║          Roblox FishIt Script - Bundled          ║
     ║                                                   ║
-    ║  Build Date: 2025-11-16 20:04:49                        ║
+    ║  Build Date: 2025-11-25 18:19:03                        ║
     ║  Version: 2.0.0                              ║
     ║                                                   ║
     ║  ⚠️  FOR EDUCATIONAL PURPOSES ONLY               ║
@@ -614,6 +614,817 @@ Modules["utils/player-utils"] = function()
 
 end
 
+-- Module: features/fishing/instant-fish
+Modules["features/fishing/instant-fish"] = function()
+    --[[
+        Instant Fishing Module
+
+        Automatically catches fish without minigame interaction.
+        Uses the fishing sequence: Charge → Start → Wait → Complete
+
+        Usage:
+            local InstantFish = require("src/features/fishing/instant-fish")
+            InstantFish.start()
+    ]]
+
+    local State = require("src/core/state")
+    local Services = require("src/core/services")
+    local Events = require("src/network/events")
+    local Functions = require("src/network/functions")
+
+    local InstantFish = {}
+
+    -- Private variables
+    local isRunning = false
+
+    --[[
+        Get current fish count from inventory UI
+        @return number - Current fish count
+    ]]
+    function InstantFish.getFishCount()
+        local bagSizeLabel = State.player.PlayerGui
+            :WaitForChild("Inventory")
+            :WaitForChild("Main")
+            :WaitForChild("Top")
+            :WaitForChild("Options")
+            :WaitForChild("Fish")
+            :WaitForChild("Label")
+            :WaitForChild("BagSize")
+
+        return tonumber((bagSizeLabel.Text or "0/???"):match("(%d+)/")) or 0
+    end
+
+    --[[
+        Execute one fishing cycle
+        @return boolean - Success status
+    ]]
+    local function executeFishingCycle()
+        if not State.canFish then
+            return false
+        end
+
+        State.canFish = false
+
+        -- Step 1: Charge rod
+        local success, _, timestamp = pcall(function()
+            return Functions.ChargeRod:InvokeServer(workspace:GetServerTimeNow())
+        end)
+
+        if success and typeof(timestamp) == "number" then
+            local direction = -1
+            local power = 0.999
+
+            task.wait(0.3)
+
+            -- Step 2: Start minigame
+            pcall(function()
+                Functions.StartMini:InvokeServer(direction, power, timestamp)
+            end)
+
+            -- Step 3: Wait for fish data
+            local startTime = tick()
+            repeat
+                task.wait(0.05)
+            until (_G.FishMiniData and _G.FishMiniData.LastShift) or (tick() - startTime > 1)
+
+            -- Apply custom delay if set
+            task.wait(_G.DelayComplete or 0)
+
+            -- Step 4: Complete fishing
+            pcall(function()
+                Events.REFishDone:FireServer()
+            end)
+
+            -- Step 5: Wait for fish to be added to inventory
+            local oldCount = InstantFish.getFishCount()
+            local waitStart = tick()
+            repeat
+                task.wait(0.05)
+            until oldCount < InstantFish.getFishCount() or (tick() - waitStart > 1)
+        end
+
+        State.canFish = true
+        return true
+    end
+
+    --[[
+        Start instant fishing loop
+    ]]
+    function InstantFish.start()
+        if isRunning then
+            return
+        end
+
+        isRunning = true
+        State.autoInstant = true
+
+        -- Update counter
+        _G.Celestial.InstantCount = InstantFish.getFishCount()
+
+        task.spawn(function()
+            while State.autoInstant and isRunning do
+                local success = executeFishingCycle()
+
+                if not success then
+                    task.wait(0.1)
+                end
+
+                task.wait(0.05)
+            end
+        end)
+    end
+
+    --[[
+        Stop instant fishing
+    ]]
+    function InstantFish.stop()
+        State.autoInstant = false
+        isRunning = false
+    end
+
+    --[[
+        Check if instant fishing is running
+        @return boolean
+    ]]
+    function InstantFish.isRunning()
+        return isRunning
+    end
+
+    return InstantFish
+
+end
+
+-- Module: features/selling/auto-sell
+Modules["features/selling/auto-sell"] = function()
+    --[[
+        Auto Sell Module
+
+        Automatically sells fish based on mode:
+        - Delay: Sell every X seconds
+        - Count: Sell when fish count reaches X
+
+        Usage:
+            local AutoSell = require("src/features/selling/auto-sell")
+            AutoSell.start()
+    ]]
+
+    local State = require("src/core/state")
+    local Services = require("src/core/services")
+
+    local AutoSell = {}
+
+    -- Private variables
+    local isRunning = false
+    local SellAllItemsFunction = nil
+
+    --[[
+        Initialize sell function
+    ]]
+    local function initialize()
+        if not SellAllItemsFunction then
+            SellAllItemsFunction = Services.Net["RF/SellAllItems"]
+        end
+    end
+
+    --[[
+        Get current fish count from UI
+        @return number - Current count
+        @return number - Max capacity
+    ]]
+    function AutoSell.getFishCount()
+        local bagSizeLabel = State.player.PlayerGui
+            :WaitForChild("Inventory")
+            .Main.Top.Options.Fish.Label
+            :FindFirstChild("BagSize")
+
+        local current = 0
+        local max = 0
+
+        if bagSizeLabel and bagSizeLabel:IsA("TextLabel") then
+            local currentStr, maxStr = (bagSizeLabel.Text or ""):match("(%d+)%s*/%s*(%d+)")
+            current = tonumber(currentStr) or 0
+            max = tonumber(maxStr) or 0
+        end
+
+        return current, max
+    end
+
+    --[[
+        Execute sell all items
+        @return boolean - Success status
+    ]]
+    local function sellAllItems()
+        initialize()
+
+        if not SellAllItemsFunction then
+            warn("[AutoSell] Sell function not available")
+            return false
+        end
+
+        local success = pcall(function()
+            SellAllItemsFunction:InvokeServer()
+        end)
+
+        return success
+    end
+
+    --[[
+        Auto sell loop based on mode
+    ]]
+    local function autoSellLoop()
+        while State.autoSellEnabled and isRunning do
+            local current, max = AutoSell.getFishCount()
+
+            if State.sellMode == "Delay" then
+                -- Sell by delay mode
+                sellAllItems()
+                task.wait(State.sellDelay)
+
+            elseif State.sellMode == "Count" then
+                -- Sell by count mode
+                local threshold = tonumber(State.inputSellCount) or max
+
+                if threshold <= current then
+                    sellAllItems()
+                    task.wait(0.5)
+                else
+                    task.wait(1)
+                end
+            end
+        end
+    end
+
+    --[[
+        Start auto sell
+    ]]
+    function AutoSell.start()
+        if isRunning then
+            return
+        end
+
+        isRunning = true
+        State.autoSellEnabled = true
+
+        task.spawn(autoSellLoop)
+    end
+
+    --[[
+        Stop auto sell
+    ]]
+    function AutoSell.stop()
+        State.autoSellEnabled = false
+        isRunning = false
+    end
+
+    --[[
+        Set sell mode
+        @param mode string - "Delay" or "Count"
+    ]]
+    function AutoSell.setMode(mode)
+        if mode == "Delay" or mode == "Count" then
+            State.sellMode = mode
+        else
+            warn("[AutoSell] Invalid mode: " .. tostring(mode))
+        end
+    end
+
+    --[[
+        Set sell delay (for Delay mode)
+        @param seconds number - Delay in seconds
+    ]]
+    function AutoSell.setDelay(seconds)
+        State.sellDelay = math.max(1, tonumber(seconds) or 60)
+    end
+
+    --[[
+        Set sell count threshold (for Count mode)
+        @param count number - Fish count threshold
+    ]]
+    function AutoSell.setCount(count)
+        State.inputSellCount = math.max(1, tonumber(count) or 50)
+    end
+
+    --[[
+        Check if auto sell is running
+        @return boolean
+    ]]
+    function AutoSell.isRunning()
+        return isRunning
+    end
+
+    return AutoSell
+
+end
+
+-- Module: features/favorites/auto-favorite
+Modules["features/favorites/auto-favorite"] = function()
+    --[[
+        Auto Favorite Module
+
+        Automatically favorites fish based on filters:
+        - Name
+        - Rarity
+        - Variant
+
+        Usage:
+            local AutoFavorite = require("src/features/favorites/auto-favorite")
+            AutoFavorite.setFilters({ names = {"Megalodon"}, rarities = {"Mythic"} })
+            AutoFavorite.start()
+    ]]
+
+    local State = require("src/core/state")
+    local Services = require("src/core/services")
+    local Constants = require("src/core/constants")
+    local Events = require("src/network/events")
+
+    local AutoFavorite = {}
+
+    -- Private variables
+    local favoriteCache = {}
+    local dataConnection = nil
+
+    --[[
+        Convert table to set (for faster lookups)
+        @param tbl table - Array to convert
+        @return table - Set table
+    ]]
+    local function toSet(tbl)
+        local set = {}
+
+        if type(tbl) == "table" then
+            -- Handle array part
+            for _, value in ipairs(tbl) do
+                set[value] = true
+            end
+
+            -- Handle dictionary part
+            for key, value in pairs(tbl) do
+                if value then
+                    set[key] = true
+                end
+            end
+        end
+
+        return set
+    end
+
+    --[[
+        Check if item should be favorited based on filters
+        @param item table - Item data
+        @return boolean - Should favorite
+    ]]
+    local function shouldFavorite(item)
+        if not State.autoFavEnabled then
+            return false
+        end
+
+        -- Get item data
+        local itemData = Services.ItemUtility.GetItemDataFromItemType("Items", item.Id)
+
+        if not itemData or itemData.Data.Type ~= "Fish" then
+            return false
+        end
+
+        local rarity = Constants.TIER_FISH[itemData.Data.Tier]
+        local name = itemData.Data.Name
+        local variant = (item.Metadata and item.Metadata.VariantId) or "None"
+
+        -- Check filters
+        local matchName = State.selectedName[name]
+        local matchRarity = State.selectedRarity[rarity]
+        local matchVariant = State.selectedVariant[variant]
+
+        -- Check current favorite status
+        local currentlyFavorited = rawget(favoriteCache, item.UUID)
+        if currentlyFavorited == nil then
+            currentlyFavorited = item.Favorited
+        end
+
+        -- Logic: If both name AND variant are selected, match both
+        -- Otherwise, match name OR rarity
+        local shouldBeFavorited = false
+
+        if next(State.selectedVariant) ~= nil and next(State.selectedName) ~= nil then
+            shouldBeFavorited = matchName and matchVariant
+        else
+            shouldBeFavorited = matchName or matchRarity
+        end
+
+        return shouldBeFavorited and not currentlyFavorited, item.UUID
+    end
+
+    --[[
+        Favorite an item
+        @param uuid string - Item UUID
+    ]]
+    local function favoriteItem(uuid)
+        Events.REFav:FireServer(uuid)
+        rawset(favoriteCache, uuid, true)
+    end
+
+    --[[
+        Scan inventory and favorite matching items
+    ]]
+    local function scanInventory()
+        if not State.autoFavEnabled then
+            return
+        end
+
+        local Data = Services.Replion.Client:WaitReplion("Data")
+        local items = Data:GetExpect({"Inventory", "Items"})
+
+        for _, item in ipairs(items) do
+            local should, uuid = shouldFavorite(item)
+            if should then
+                favoriteItem(uuid)
+            end
+        end
+    end
+
+    --[[
+        Start auto favorite
+    ]]
+    function AutoFavorite.start()
+        if State.autoFavEnabled then
+            return
+        end
+
+        State.autoFavEnabled = true
+
+        -- Initial scan
+        scanInventory()
+
+        -- Watch for new items
+        local Data = Services.Replion.Client:WaitReplion("Data")
+        if dataConnection then
+            dataConnection:Disconnect()
+        end
+
+        dataConnection = Data:OnChange({"Inventory", "Items"}, scanInventory)
+    end
+
+    --[[
+        Stop auto favorite
+    ]]
+    function AutoFavorite.stop()
+        State.autoFavEnabled = false
+
+        if dataConnection then
+            dataConnection:Disconnect()
+            dataConnection = nil
+        end
+    end
+
+    --[[
+        Set name filter
+        @param names table - Array of fish names
+    ]]
+    function AutoFavorite.setNames(names)
+        State.selectedName = toSet(names)
+    end
+
+    --[[
+        Set rarity filter
+        @param rarities table - Array of rarities
+    ]]
+    function AutoFavorite.setRarities(rarities)
+        State.selectedRarity = toSet(rarities)
+    end
+
+    --[[
+        Set variant filter (only works with name filter)
+        @param variants table - Array of variants
+    ]]
+    function AutoFavorite.setVariants(variants)
+        if next(State.selectedName) ~= nil then
+            State.selectedVariant = toSet(variants)
+        else
+            State.selectedVariant = {}
+            warn("[AutoFavorite] Select names first before selecting variants")
+        end
+    end
+
+    --[[
+        Unfavorite all fish
+    ]]
+    function AutoFavorite.unfavoriteAll()
+        local Data = Services.Replion.Client:WaitReplion("Data")
+        local items = Data:GetExpect({"Inventory", "Items"})
+
+        for _, item in ipairs(items) do
+            local isFavorited = rawget(favoriteCache, item.UUID)
+            if isFavorited == nil then
+                isFavorited = item.Favorited
+            end
+
+            if isFavorited then
+                Events.REFav:FireServer(item.UUID)
+                rawset(favoriteCache, item.UUID, false)
+            end
+        end
+    end
+
+    --[[
+        Setup favorite state change listener
+    ]]
+    function AutoFavorite.setupListener()
+        -- Listen for favorite state changes from server
+        Events.REFavChg.OnClientEvent:Connect(function(uuid, favorited)
+            rawset(favoriteCache, uuid, favorited)
+        end)
+    end
+
+    -- Initialize listener on module load
+    AutoFavorite.setupListener()
+
+    return AutoFavorite
+
+end
+
+-- Module: config/locations
+Modules["config/locations"] = function()
+    --[[
+        Locations Configuration
+
+        Predefined teleport locations in the game.
+
+        Usage:
+            local Locations = require("src/config/locations")
+            local pos = Locations["Treasure Room"]
+    ]]
+
+    local Locations = {
+        -- Deep Sea
+        ["Treasure Room"] = Vector3.new(-3602.01, -266.57, -1577.18),
+        ["Sisyphus Statue"] = Vector3.new(-3703.69, -135.57, -1017.17),
+
+        -- Crater Island
+        ["Crater Island Top"] = Vector3.new(1011.29, 22.68, 5076.27),
+        ["Crater Island Ground"] = Vector3.new(1079.57, 3.64, 5080.35),
+
+        -- Coral Reefs
+        ["Coral Reefs SPOT 1"] = Vector3.new(-3031.88, 2.52, 2276.36),
+        ["Coral Reefs SPOT 2"] = Vector3.new(-3270.86, 2.5, 2228.1),
+        ["Coral Reefs SPOT 3"] = Vector3.new(-3136.1, 2.61, 2126.11),
+
+        -- Main Areas
+        ["Lost Shore"] = Vector3.new(-3737.97, 5.43, -854.68),
+        ["Weather Machine"] = Vector3.new(-1524.88, 2.87, 1915.56),
+        ["Stingray Shores"] = Vector3.new(44.41, 28.83, 3048.93),
+        ["Ice Sea"] = Vector3.new(2164, 7, 3269),
+
+        -- Kohana
+        ["Kohana Volcano"] = Vector3.new(-561.81, 21.24, 156.72),
+        ["Kohana SPOT 1"] = Vector3.new(-367.77, 6.75, 521.91),
+        ["Kohana SPOT 2"] = Vector3.new(-623.96, 19.25, 419.36),
+
+        -- Tropical Grove
+        ["Tropical Grove"] = Vector3.new(-2018.91, 9.04, 3750.59),
+        ["Tropical Grove Cave 1"] = Vector3.new(-2151, 3, 3671),
+        ["Tropical Grove Cave 2"] = Vector3.new(-2018, 5, 3756),
+        ["Tropical Grove Highground"] = Vector3.new(-2139, 53, 3624),
+
+        -- Fisherman Island
+        ["Fisherman Island Underground"] = Vector3.new(-62, 3, 2846),
+        ["Fisherman Island Mid"] = Vector3.new(33, 3, 2764),
+        ["Fisherman Island Rift Left"] = Vector3.new(-26, 10, 2686),
+        ["Fisherman Island Rift Right"] = Vector3.new(95, 10, 2684),
+
+        -- Ancient Areas
+        ["Secret Temple"] = Vector3.new(1475, -22, -632),
+        ["Ancient Jungle Outside"] = Vector3.new(1488, 8, -392),
+        ["Ancient Jungle"] = Vector3.new(1274, 8, -184),
+        ["Underground Cellar"] = Vector3.new(2136, -91, -699),
+        ["Crystalline Passage"] = Vector3.new(6051, -539, 4386),
+        ["Ancient Ruin"] = Vector3.new(6090, -586, 4634)
+    }
+
+    return Locations
+
+end
+
+-- Module: features/teleport/teleport
+Modules["features/teleport/teleport"] = function()
+    --[[
+        Teleport Module
+
+        Handles character teleportation and position save/load.
+
+        Usage:
+            local Teleport = require("src/features/teleport/teleport")
+            Teleport.toLocation("Treasure Room")
+            Teleport.savePosition()
+    ]]
+
+    local State = require("src/core/state")
+    local Services = require("src/core/services")
+    local Locations = require("src/config/locations")
+    local PlayerUtils = require("src/utils/player-utils")
+
+    local Teleport = {}
+
+    -- Position save file
+    local SAVE_FILE = "FishIt/SavedPosition.json"
+
+    --[[
+        Get location names (sorted alphabetically)
+        @return table - Array of location names
+    ]]
+    function Teleport.getLocationNames()
+        local names = {}
+
+        for name in pairs(Locations) do
+            table.insert(names, name)
+        end
+
+        table.sort(names, function(a, b)
+            return a:lower() < b:lower()
+        end)
+
+        return names
+    end
+
+    --[[
+        Get location position
+        @param locationName string - Name of location
+        @return Vector3 - Position or nil if not found
+    ]]
+    function Teleport.getLocation(locationName)
+        return Locations[locationName]
+    end
+
+    --[[
+        Teleport to location by name
+        @param locationName string - Name of location
+        @return boolean - Success status
+    ]]
+    function Teleport.toLocation(locationName)
+        local position = Locations[locationName]
+
+        if not position then
+            warn("[Teleport] Location not found: " .. tostring(locationName))
+            return false
+        end
+
+        local character = State.player.Character
+        if not character then
+            warn("[Teleport] Character not found")
+            return false
+        end
+
+        PlayerUtils.teleport(character, position)
+        return true
+    end
+
+    --[[
+        Teleport to position
+        @param position Vector3 - Target position
+        @return boolean - Success status
+    ]]
+    function Teleport.toPosition(position)
+        local character = State.player.Character
+        if not character then
+            warn("[Teleport] Character not found")
+            return false
+        end
+
+        PlayerUtils.teleport(character, position)
+        return true
+    end
+
+    --[[
+        Teleport to CFrame
+        @param cframe CFrame - Target CFrame
+        @return boolean - Success status
+    ]]
+    function Teleport.toCFrame(cframe)
+        local character = State.player.Character
+        if not character then
+            warn("[Teleport] Character not found")
+            return false
+        end
+
+        local hrp = PlayerUtils.getHumanoidRootPart(character)
+        if hrp then
+            hrp.CFrame = cframe
+            return true
+        end
+
+        return false
+    end
+
+    --[[
+        Save current position to file
+        @return boolean - Success status
+    ]]
+    function Teleport.savePosition()
+        local character = State.player.Character
+        if not character then
+            warn("[Teleport] Character not found")
+            return false
+        end
+
+        local hrp = PlayerUtils.getHumanoidRootPart(character)
+        if not hrp then
+            warn("[Teleport] HumanoidRootPart not found")
+            return false
+        end
+
+        -- Save CFrame components
+        local components = {hrp.CFrame:GetComponents()}
+
+        local success = pcall(function()
+            writefile(SAVE_FILE, Services.HttpService:JSONEncode(components))
+        end)
+
+        if success then
+            State.savedCFrame = hrp.CFrame
+        end
+
+        return success
+    end
+
+    --[[
+        Load saved position from file
+        @return CFrame - Saved CFrame or nil
+    ]]
+    function Teleport.loadPosition()
+        if not isfile(SAVE_FILE) then
+            return nil
+        end
+
+        local success, result = pcall(function()
+            local data = Services.HttpService:JSONDecode(readfile(SAVE_FILE))
+            return CFrame.new(unpack(data))
+        end)
+
+        if success and typeof(result) == "CFrame" then
+            return result
+        end
+
+        return nil
+    end
+
+    --[[
+        Teleport to saved position
+        @return boolean - Success status
+    ]]
+    function Teleport.toSavedPosition()
+        local savedCFrame = Teleport.loadPosition()
+
+        if not savedCFrame then
+            warn("[Teleport] No saved position found")
+            return false
+        end
+
+        return Teleport.toCFrame(savedCFrame)
+    end
+
+    --[[
+        Clear saved position
+    ]]
+    function Teleport.clearSavedPosition()
+        if isfile(SAVE_FILE) then
+            pcall(delfile, SAVE_FILE)
+        end
+
+        State.savedCFrame = nil
+    end
+
+    --[[
+        Auto teleport to last position on character added
+    ]]
+    function Teleport.setupAutoTeleport()
+        State.player.CharacterAdded:Connect(function(character)
+            task.spawn(function()
+                character:WaitForChild("HumanoidRootPart", 5)
+                local savedCFrame = Teleport.loadPosition()
+
+                if savedCFrame then
+                    task.wait(2) -- Wait for character to fully load
+                    Teleport.toCFrame(savedCFrame)
+                    print("[Teleport] Auto teleported to saved position")
+                end
+            end)
+        end)
+
+        -- Also teleport on initial load
+        if State.player.Character then
+            task.spawn(function()
+                local savedCFrame = Teleport.loadPosition()
+                if savedCFrame then
+                    task.wait(2)
+                    Teleport.toCFrame(savedCFrame)
+                    print("[Teleport] Teleported to saved position")
+                end
+            end)
+        end
+    end
+
+    return Teleport
+
+end
+
 -- Module: main
 Modules["main"] = function()
     --[[
@@ -665,6 +1476,21 @@ Modules["main"] = function()
     local PlayerUtils = require("src/utils/player-utils")
 
     -- ============================================
+    -- LOAD FEATURE MODULES
+    -- ============================================
+
+    local InstantFish = require("src/features/fishing/instant-fish")
+    local AutoSell = require("src/features/selling/auto-sell")
+    local AutoFavorite = require("src/features/favorites/auto-favorite")
+    local Teleport = require("src/features/teleport/teleport")
+
+    -- ============================================
+    -- LOAD CONFIG MODULES
+    -- ============================================
+
+    local Locations = require("src/config/locations")
+
+    -- ============================================
     -- WAIT FOR CHARACTER
     -- ============================================
 
@@ -689,7 +1515,7 @@ Modules["main"] = function()
 
     print("╔═══════════════════════════════════════════════════╗")
     print("║        Roblox FishIt Script - Refactored         ║")
-    print("║                  Version 2.0.0                    ║")
+    print("║              Version 2.0.0 - Phase 2             ║")
     print("╚═══════════════════════════════════════════════════╝")
     print("")
     print("✅ Core modules loaded:")
@@ -705,20 +1531,29 @@ Modules["main"] = function()
     print("✅ Utility modules loaded:")
     print("   - PlayerUtils ✓")
     print("")
+    print("✅ Feature modules loaded:")
+    print("   - InstantFish ✓")
+    print("   - AutoSell ✓")
+    print("   - AutoFavorite ✓")
+    print("   - Teleport ✓")
+    print("")
+    print("✅ Config modules loaded:")
+    print("   - Locations ✓")
+    print("")
     print("👤 Player:", LocalPlayer.Name)
     print("🔧 Executor: Compatible")
     print("")
-    print("⚠️  Feature modules not yet implemented!")
-    print("📝 This is Phase 1 of refactoring (Core + Network)")
+    print("⚠️  UI modules not yet implemented!")
+    print("📝 This is Phase 2 of refactoring (Features extracted)")
     print("")
-    print("Next: Add feature modules (fishing, selling, trading, etc.)")
+    print("Next: Add UI modules to control features")
     print("See CLAUDE.md for roadmap.")
 
     -- ============================================
-    -- TODO: LOAD FEATURE MODULES
+    -- INITIALIZE AUTO TELEPORT
     -- ============================================
 
-    -- Phase 3: Load feature modules here when implemented
+    Teleport.setupAutoTeleport()
 
     -- ============================================
     -- TODO: LOAD UI MODULES
@@ -728,6 +1563,7 @@ Modules["main"] = function()
 
     print("")
     print("🎯 Script initialization complete!")
+    print("📌 Features available but need UI to activate")
 
 end
 

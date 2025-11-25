@@ -47,6 +47,21 @@ local Webhook = require("src/network/webhook")
 local PlayerUtils = require("src/utils/player-utils")
 
 -- ============================================
+-- LOAD FEATURE MODULES
+-- ============================================
+
+local InstantFish = require("src/features/fishing/instant-fish")
+local AutoSell = require("src/features/selling/auto-sell")
+local AutoFavorite = require("src/features/favorites/auto-favorite")
+local Teleport = require("src/features/teleport/teleport")
+
+-- ============================================
+-- LOAD CONFIG MODULES
+-- ============================================
+
+local Locations = require("src/config/locations")
+
+-- ============================================
 -- WAIT FOR CHARACTER
 -- ============================================
 
@@ -71,7 +86,7 @@ _G.Variant = Constants.VARIANTS
 
 print("╔═══════════════════════════════════════════════════╗")
 print("║        Roblox FishIt Script - Refactored         ║")
-print("║                  Version 2.0.0                    ║")
+print("║              Version 2.0.0 - Phase 2             ║")
 print("╚═══════════════════════════════════════════════════╝")
 print("")
 print("✅ Core modules loaded:")
@@ -87,20 +102,29 @@ print("")
 print("✅ Utility modules loaded:")
 print("   - PlayerUtils ✓")
 print("")
+print("✅ Feature modules loaded:")
+print("   - InstantFish ✓")
+print("   - AutoSell ✓")
+print("   - AutoFavorite ✓")
+print("   - Teleport ✓")
+print("")
+print("✅ Config modules loaded:")
+print("   - Locations ✓")
+print("")
 print("👤 Player:", LocalPlayer.Name)
 print("🔧 Executor: Compatible")
 print("")
-print("⚠️  Feature modules not yet implemented!")
-print("📝 This is Phase 1 of refactoring (Core + Network)")
+print("⚠️  UI modules not yet implemented!")
+print("📝 This is Phase 2 of refactoring (Features extracted)")
 print("")
-print("Next: Add feature modules (fishing, selling, trading, etc.)")
+print("Next: Add UI modules to control features")
 print("See CLAUDE.md for roadmap.")
 
 -- ============================================
--- TODO: LOAD FEATURE MODULES
+-- INITIALIZE AUTO TELEPORT
 -- ============================================
 
--- Phase 3: Load feature modules here when implemented
+Teleport.setupAutoTeleport()
 
 -- ============================================
 -- TODO: LOAD UI MODULES
@@ -110,3 +134,4 @@ print("See CLAUDE.md for roadmap.")
 
 print("")
 print("🎯 Script initialization complete!")
+print("📌 Features available but need UI to activate")
