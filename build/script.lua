@@ -2,7 +2,7 @@
     ╔═══════════════════════════════════════════════════╗
     ║          Roblox FishIt Script - Bundled          ║
     ║                                                   ║
-    ║  Build Date: 2025-11-25 18:19:03                        ║
+    ║  Build Date: 2025-11-25 18:23:18                        ║
     ║  Version: 2.0.0                              ║
     ║                                                   ║
     ║  ⚠️  FOR EDUCATIONAL PURPOSES ONLY               ║
@@ -1425,6 +1425,658 @@ Modules["features/teleport/teleport"] = function()
 
 end
 
+-- Module: ui/library
+Modules["ui/library"] = function()
+    --[[
+        UI Library Module
+
+        Loads and configures the UI library with Discord dark theme.
+
+        Usage:
+            local Library = require("src/ui/library")
+            local window = Library.createWindow()
+    ]]
+
+    local Library = {}
+
+    -- Discord Dark Theme Colors
+    Library.Theme = {
+        -- Primary colors (Discord dark mode)
+        Background = Color3.fromRGB(54, 57, 63),      -- Dark gray (#36393f)
+        Secondary = Color3.fromRGB(47, 49, 54),       -- Darker gray (#2f3136)
+        Tertiary = Color3.fromRGB(32, 34, 37),        -- Darkest gray (#202225)
+
+        -- Accent colors
+        Primary = Color3.fromRGB(88, 101, 242),       -- Blurple (#5865f2)
+        Success = Color3.fromRGB(67, 181, 129),       -- Green (#43b581)
+        Warning = Color3.fromRGB(250, 166, 26),       -- Yellow (#faa61a)
+        Danger = Color3.fromRGB(237, 66, 69),         -- Red (#ed4245)
+
+        -- Text colors
+        TextPrimary = Color3.fromRGB(255, 255, 255),  -- White
+        TextSecondary = Color3.fromRGB(185, 187, 190), -- Gray
+        TextMuted = Color3.fromRGB(114, 118, 125),    -- Muted gray
+
+        -- Interactive colors
+        Interactive = Color3.fromRGB(185, 187, 190),
+        InteractiveHover = Color3.fromRGB(220, 221, 222),
+        InteractiveActive = Color3.fromRGB(255, 255, 255)
+    }
+
+    --[[
+        Load external UI library
+        @return table - UI library object
+    ]]
+    function Library.load()
+        local success, library = pcall(function()
+            return loadstring(game:HttpGet("https://raw.githubusercontent.com/TesterX14/XXXX/refs/heads/main/Library"))()
+        end)
+
+        if not success then
+            warn("[UI Library] Failed to load external library")
+            return nil
+        end
+
+        return library
+    end
+
+    --[[
+        Create main window with Zivi Hub branding
+        @return table - Window object
+    ]]
+    function Library.createWindow()
+        local lib = Library.load()
+
+        if not lib then
+            error("[UI Library] Cannot create window - library not loaded")
+        end
+
+        -- Create window with Discord dark theme
+        local window = lib:Window({
+            Title = "Zivi Hub",
+            Footer = "Version 1.0.0 BETA",
+            Image = "132435516080103",
+            Color = Library.Theme.Primary,  -- Discord blurple
+            Theme = 9542022979,
+            Version = 3
+        })
+
+        if window then
+            print("[UI Library] Window created successfully")
+        end
+
+        return window
+    end
+
+    --[[
+        Create notification
+        @param title string - Notification title
+        @param message string - Notification message
+        @param duration number - Duration in seconds
+    ]]
+    function Library.notify(title, message, duration)
+        -- Implementation depends on the UI library
+        -- This is a placeholder
+        print(string.format("[%s] %s", title, message))
+    end
+
+    return Library
+
+end
+
+-- Module: ui/tabs/fish-tab
+Modules["ui/tabs/fish-tab"] = function()
+    --[[
+        Fish Tab Module
+
+        UI for fishing features.
+
+        Usage:
+            local FishTab = require("src/ui/tabs/fish-tab")
+            FishTab.setup(tab)
+    ]]
+
+    local InstantFish = require("src/features/fishing/instant-fish")
+    local State = require("src/core/state")
+
+    local FishTab = {}
+
+    --[[
+        Setup fish tab UI
+        @param tab table - Tab object from UI library
+    ]]
+    function FishTab.setup(tab)
+        -- Fishing Features Section
+        local fishingSection = tab:AddSection("⚡ Instant Fishing")
+
+        -- Instant Fishing Toggle
+        fishingSection:AddToggle({
+            Title = "Instant Fishing",
+            Content = "Auto catch fish instantly (bypasses minigame)",
+            Default = false,
+            Callback = function(enabled)
+                if enabled then
+                    InstantFish.start()
+                    print("[Fish Tab] Instant fishing started")
+                else
+                    InstantFish.stop()
+                    print("[Fish Tab] Instant fishing stopped")
+                end
+            end
+        })
+
+        -- Delay Complete Input
+        fishingSection:AddInput({
+            Title = "Complete Delay",
+            Content = "Delay after catching (seconds)",
+            Value = tostring(_G.DelayComplete or 0),
+            Callback = function(value)
+                local delay = tonumber(value)
+                if delay and delay >= 0 then
+                    _G.DelayComplete = delay
+                    print("[Fish Tab] Complete delay set to:", delay)
+                end
+            end
+        })
+
+        -- Fishing Stats Section
+        local statsSection = tab:AddSection("📊 Fishing Stats")
+
+        local statsLabel = statsSection:AddParagraph({
+            Title = "Statistics",
+            Content = "Fish Count: 0\nStatus: Idle"
+        })
+
+        -- Update stats periodically
+        task.spawn(function()
+            while true do
+                task.wait(2)
+
+                if InstantFish.isRunning() then
+                    local count = InstantFish.getFishCount()
+                    local startCount = _G.Celestial.InstantCount or 0
+                    local caught = count - startCount
+
+                    statsLabel:SetContent(string.format(
+                        "Fish Count: %d\nCaught: %d\nStatus: Fishing",
+                        count, caught
+                    ))
+                else
+                    local count = InstantFish.getFishCount()
+                    statsLabel:SetContent(string.format(
+                        "Fish Count: %d\nStatus: Idle",
+                        count
+                    ))
+                end
+            end
+        end)
+
+        -- Info Section
+        local infoSection = tab:AddSection("ℹ️ Information")
+
+        infoSection:AddParagraph({
+            Title = "How to Use",
+            Content = [[
+    1. Toggle 'Instant Fishing' to start
+    2. Script will auto catch fish
+    3. Adjust delay if needed (default: 0s)
+    4. Monitor stats below
+
+    ⚠️ Warning: May be detected!
+    Use at your own risk.
+            ]]
+        })
+
+        print("[Fish Tab] Initialized")
+    end
+
+    return FishTab
+
+end
+
+-- Module: ui/tabs/auto-tab
+Modules["ui/tabs/auto-tab"] = function()
+    --[[
+        Auto Tab Module
+
+        UI for automation features (sell, favorite).
+
+        Usage:
+            local AutoTab = require("src/ui/tabs/auto-tab")
+            AutoTab.setup(tab)
+    ]]
+
+    local AutoSell = require("src/features/selling/auto-sell")
+    local AutoFavorite = require("src/features/favorites/auto-favorite")
+    local State = require("src/core/state")
+    local Constants = require("src/core/constants")
+
+    local AutoTab = {}
+
+    -- Fish names list (will be populated)
+    local fishNames = {}
+
+    --[[
+        Get all fish names from game
+        @return table - Array of fish names
+    ]]
+    local function getFishNames()
+        if #fishNames > 0 then
+            return fishNames
+        end
+
+        local Services = require("src/core/services")
+        local items = Services.RS:WaitForChild("Items")
+
+        for _, item in ipairs(items:GetChildren()) do
+            if item:IsA("ModuleScript") then
+                local success, result = pcall(require, item)
+                if success and result.Data and result.Data.Type == "Fish" then
+                    table.insert(fishNames, result.Data.Name)
+                end
+            end
+        end
+
+        table.sort(fishNames)
+        return fishNames
+    end
+
+    --[[
+        Setup auto tab UI
+        @param tab table - Tab object from UI library
+    ]]
+    function AutoTab.setup(tab)
+        -- === AUTO SELL SECTION ===
+        local sellSection = tab:AddSection("💰 Auto Sell")
+
+        -- Sell Mode Dropdown
+        sellSection:AddDropdown({
+            Title = "Sell Mode",
+            Options = {"Delay", "Count"},
+            Multi = false,
+            Default = "Delay",
+            Callback = function(mode)
+                AutoSell.setMode(mode)
+                print("[Auto Tab] Sell mode:", mode)
+            end
+        })
+
+        -- Delay Input
+        sellSection:AddInput({
+            Title = "Sell Delay (seconds)",
+            Content = "Sell every X seconds",
+            Value = "60",
+            Callback = function(value)
+                local delay = tonumber(value)
+                if delay and delay >= 1 then
+                    AutoSell.setDelay(delay)
+                    print("[Auto Tab] Sell delay:", delay)
+                end
+            end
+        })
+
+        -- Count Input
+        sellSection:AddInput({
+            Title = "Sell Count",
+            Content = "Sell when fish count reaches X",
+            Value = "50",
+            Callback = function(value)
+                local count = tonumber(value)
+                if count and count >= 1 then
+                    AutoSell.setCount(count)
+                    print("[Auto Tab] Sell count:", count)
+                end
+            end
+        })
+
+        -- Auto Sell Toggle
+        sellSection:AddToggle({
+            Title = "Enable Auto Sell",
+            Content = "Automatically sell fish",
+            Default = false,
+            Callback = function(enabled)
+                if enabled then
+                    AutoSell.start()
+                    print("[Auto Tab] Auto sell started")
+                else
+                    AutoSell.stop()
+                    print("[Auto Tab] Auto sell stopped")
+                end
+            end
+        })
+
+        -- === AUTO FAVORITE SECTION ===
+        local favSection = tab:AddSection("⭐ Auto Favorite")
+
+        -- Fish Name Dropdown
+        favSection:AddDropdown({
+            Title = "Favorite by Name",
+            Options = getFishNames(),
+            Multi = true,
+            Callback = function(selected)
+                AutoFavorite.setNames(selected)
+                print("[Auto Tab] Favorite names:", #selected, "selected")
+            end
+        })
+
+        -- Rarity Dropdown
+        favSection:AddDropdown({
+            Title = "Favorite by Rarity",
+            Options = {
+                "Uncommon",
+                "Rare",
+                "Epic",
+                "Legendary",
+                "Mythic",
+                "Secret"
+            },
+            Multi = true,
+            Callback = function(selected)
+                AutoFavorite.setRarities(selected)
+                print("[Auto Tab] Favorite rarities:", #selected, "selected")
+            end
+        })
+
+        -- Variant Dropdown
+        favSection:AddDropdown({
+            Title = "Favorite by Variant",
+            Content = "Only works with Name filter",
+            Options = Constants.VARIANTS,
+            Multi = true,
+            Callback = function(selected)
+                AutoFavorite.setVariants(selected)
+                print("[Auto Tab] Favorite variants:", #selected, "selected")
+            end
+        })
+
+        -- Auto Favorite Toggle
+        favSection:AddToggle({
+            Title = "Enable Auto Favorite",
+            Content = "Auto favorite matching fish",
+            Default = false,
+            Callback = function(enabled)
+                if enabled then
+                    AutoFavorite.start()
+                    print("[Auto Tab] Auto favorite started")
+                else
+                    AutoFavorite.stop()
+                    print("[Auto Tab] Auto favorite stopped")
+                end
+            end
+        })
+
+        -- Unfavorite All Button
+        favSection:AddButton({
+            Title = "Unfavorite All Fish",
+            Content = "Remove favorite from all fish",
+            Callback = function()
+                AutoFavorite.unfavoriteAll()
+                print("[Auto Tab] All fish unfavorited")
+            end
+        })
+
+        print("[Auto Tab] Initialized")
+    end
+
+    return AutoTab
+
+end
+
+-- Module: ui/tabs/misc-tab
+Modules["ui/tabs/misc-tab"] = function()
+    --[[
+        Misc Tab Module
+
+        UI for miscellaneous features (teleport, settings).
+
+        Usage:
+            local MiscTab = require("src/ui/tabs/misc-tab")
+            MiscTab.setup(tab)
+    ]]
+
+    local Teleport = require("src/features/teleport/teleport")
+    local Webhook = require("src/network/webhook")
+    local State = require("src/core/state")
+
+    local MiscTab = {}
+
+    --[[
+        Setup misc tab UI
+        @param tab table - Tab object from UI library
+    ]]
+    function MiscTab.setup(tab)
+        -- === TELEPORT SECTION ===
+        local teleportSection = tab:AddSection("🌍 Teleportation")
+
+        -- Location Dropdown
+        local locationNames = Teleport.getLocationNames()
+
+        teleportSection:AddDropdown({
+            Title = "Teleport Location",
+            Options = locationNames,
+            Multi = false,
+            Callback = function(location)
+                if location and location ~= "" then
+                    local success = Teleport.toLocation(location)
+                    if success then
+                        print("[Misc Tab] Teleported to:", location)
+                    else
+                        warn("[Misc Tab] Teleport failed:", location)
+                    end
+                end
+            end
+        })
+
+        -- Save Position Button
+        teleportSection:AddButton({
+            Title = "Save Position",
+            Content = "Save current position",
+            Callback = function()
+                local success = Teleport.savePosition()
+                if success then
+                    print("[Misc Tab] Position saved")
+                else
+                    warn("[Misc Tab] Failed to save position")
+                end
+            end,
+            SubTitle = "Load Position",
+            SubCallback = function()
+                local success = Teleport.toSavedPosition()
+                if success then
+                    print("[Misc Tab] Teleported to saved position")
+                else
+                    warn("[Misc Tab] No saved position found")
+                end
+            end
+        })
+
+        -- Clear Saved Position Button
+        teleportSection:AddButton({
+            Title = "Clear Saved Position",
+            Content = "Delete saved position",
+            Callback = function()
+                Teleport.clearSavedPosition()
+                print("[Misc Tab] Saved position cleared")
+            end
+        })
+
+        -- === WEBHOOK SECTION ===
+        local webhookSection = tab:AddSection("📡 Discord Webhook")
+
+        local webhookUrl = ""
+
+        -- Webhook URL Input
+        webhookSection:AddInput({
+            Title = "Webhook URL",
+            Content = "Discord webhook URL",
+            Placeholder = "https://discord.com/api/webhooks/...",
+            Callback = function(url)
+                webhookUrl = url
+                _G.WebhookURL = url
+                print("[Misc Tab] Webhook URL saved")
+            end
+        })
+
+        -- Test Webhook Button
+        webhookSection:AddButton({
+            Title = "Test Webhook",
+            Content = "Send test message",
+            Callback = function()
+                if webhookUrl and webhookUrl ~= "" then
+                    local success = Webhook.send(webhookUrl, {
+                        embeds = {{
+                            title = "✅ Test Successful",
+                            description = "Webhook is working correctly!",
+                            color = 0x00ff00,
+                            timestamp = os.date("!%Y-%m-%dT%H:%M:%S")
+                        }}
+                    })
+
+                    if success then
+                        print("[Misc Tab] Webhook test sent")
+                    else
+                        warn("[Misc Tab] Webhook test failed")
+                    end
+                else
+                    warn("[Misc Tab] Please enter webhook URL first")
+                end
+            end
+        })
+
+        -- === SETTINGS SECTION ===
+        local settingsSection = tab:AddSection("⚙️ Settings")
+
+        -- Theme Info (read-only for now)
+        settingsSection:AddParagraph({
+            Title = "Current Theme",
+            Content = "Discord Dark Mode\nSimple & Modern Design"
+        })
+
+        -- Credits
+        local creditsSection = tab:AddSection("ℹ️ Credits")
+
+        creditsSection:AddParagraph({
+            Title = "Zivi Hub",
+            Content = [[
+    Version: 1.0.0 BETA
+    Developer: Zivi Team
+
+    Features:
+    • Instant Fishing
+    • Auto Sell
+    • Auto Favorite
+    • Teleportation
+    • Discord Webhooks
+
+    ⚠️ Use at your own risk!
+            ]]
+        })
+
+        print("[Misc Tab] Initialized")
+    end
+
+    return MiscTab
+
+end
+
+-- Module: ui/main-window
+Modules["ui/main-window"] = function()
+    --[[
+        Main Window Module
+
+        Creates and manages the main UI window with all tabs.
+
+        Usage:
+            local MainWindow = require("src/ui/main-window")
+            MainWindow.create()
+    ]]
+
+    local Library = require("src/ui/library")
+    local FishTab = require("src/ui/tabs/fish-tab")
+    local AutoTab = require("src/ui/tabs/auto-tab")
+    local MiscTab = require("src/ui/tabs/misc-tab")
+
+    local MainWindow = {}
+
+    -- Window instance
+    local window = nil
+    local tabs = {}
+
+    --[[
+        Create main window with all tabs
+        @return table - Window object
+    ]]
+    function MainWindow.create()
+        if window then
+            warn("[MainWindow] Window already exists")
+            return window
+        end
+
+        -- Create window
+        window = Library.createWindow()
+
+        if not window then
+            error("[MainWindow] Failed to create window")
+        end
+
+        -- Create tabs
+        tabs.fish = window:AddTab({
+            Name = "Fishing",
+            Icon = "rbxassetid://97167558235554"
+        })
+
+        tabs.auto = window:AddTab({
+            Name = "Automation",
+            Icon = "settings"
+        })
+
+        tabs.misc = window:AddTab({
+            Name = "Misc",
+            Icon = "wrench"
+        })
+
+        -- Setup tabs
+        FishTab.setup(tabs.fish)
+        AutoTab.setup(tabs.auto)
+        MiscTab.setup(tabs.misc)
+
+        print("[MainWindow] All tabs initialized")
+
+        return window
+    end
+
+    --[[
+        Get window instance
+        @return table - Window object or nil
+    ]]
+    function MainWindow.getWindow()
+        return window
+    end
+
+    --[[
+        Get tab by name
+        @param tabName string - Tab name
+        @return table - Tab object or nil
+    ]]
+    function MainWindow.getTab(tabName)
+        return tabs[tabName:lower()]
+    end
+
+    --[[
+        Destroy window
+    ]]
+    function MainWindow.destroy()
+        if window then
+            -- Clean up if library supports it
+            window = nil
+            tabs = {}
+        end
+    end
+
+    return MainWindow
+
+end
+
 -- Module: main
 Modules["main"] = function()
     --[[
@@ -1514,8 +2166,8 @@ Modules["main"] = function()
     -- ============================================
 
     print("╔═══════════════════════════════════════════════════╗")
-    print("║        Roblox FishIt Script - Refactored         ║")
-    print("║              Version 2.0.0 - Phase 2             ║")
+    print("║                   Zivi Hub                       ║")
+    print("║              Version 1.0.0 BETA                  ║")
     print("╚═══════════════════════════════════════════════════╝")
     print("")
     print("✅ Core modules loaded:")
@@ -1543,11 +2195,21 @@ Modules["main"] = function()
     print("👤 Player:", LocalPlayer.Name)
     print("🔧 Executor: Compatible")
     print("")
-    print("⚠️  UI modules not yet implemented!")
-    print("📝 This is Phase 2 of refactoring (Features extracted)")
+    print("✅ UI modules loaded:")
+    print("   - Library ✓")
+    print("   - MainWindow ✓")
+    print("   - FishTab ✓")
+    print("   - AutoTab ✓")
+    print("   - MiscTab ✓")
     print("")
-    print("Next: Add UI modules to control features")
-    print("See CLAUDE.md for roadmap.")
+    print("🎨 Theme: Discord Dark Mode")
+    print("🎯 Status: Ready")
+
+    -- ============================================
+    -- LOAD UI MODULES
+    -- ============================================
+
+    local MainWindow = require("src/ui/main-window")
 
     -- ============================================
     -- INITIALIZE AUTO TELEPORT
@@ -1556,14 +2218,26 @@ Modules["main"] = function()
     Teleport.setupAutoTeleport()
 
     -- ============================================
-    -- TODO: LOAD UI MODULES
+    -- CREATE UI
     -- ============================================
 
-    -- Phase 4: Load UI modules here when implemented
+    print("")
+    print("🎨 Creating UI...")
+
+    local success, err = pcall(function()
+        MainWindow.create()
+    end)
+
+    if success then
+        print("✅ UI created successfully!")
+    else
+        warn("❌ UI creation failed:", err)
+        print("⚠️  Features still available via console")
+    end
 
     print("")
-    print("🎯 Script initialization complete!")
-    print("📌 Features available but need UI to activate")
+    print("🎯 Zivi Hub loaded!")
+    print("📌 Discord Dark Theme Active")
 
 end
 

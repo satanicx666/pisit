@@ -85,8 +85,8 @@ _G.Variant = Constants.VARIANTS
 -- ============================================
 
 print("╔═══════════════════════════════════════════════════╗")
-print("║        Roblox FishIt Script - Refactored         ║")
-print("║              Version 2.0.0 - Phase 2             ║")
+print("║                   Zivi Hub                       ║")
+print("║              Version 1.0.0 BETA                  ║")
 print("╚═══════════════════════════════════════════════════╝")
 print("")
 print("✅ Core modules loaded:")
@@ -114,11 +114,21 @@ print("")
 print("👤 Player:", LocalPlayer.Name)
 print("🔧 Executor: Compatible")
 print("")
-print("⚠️  UI modules not yet implemented!")
-print("📝 This is Phase 2 of refactoring (Features extracted)")
+print("✅ UI modules loaded:")
+print("   - Library ✓")
+print("   - MainWindow ✓")
+print("   - FishTab ✓")
+print("   - AutoTab ✓")
+print("   - MiscTab ✓")
 print("")
-print("Next: Add UI modules to control features")
-print("See CLAUDE.md for roadmap.")
+print("🎨 Theme: Discord Dark Mode")
+print("🎯 Status: Ready")
+
+-- ============================================
+-- LOAD UI MODULES
+-- ============================================
+
+local MainWindow = require("src/ui/main-window")
 
 -- ============================================
 -- INITIALIZE AUTO TELEPORT
@@ -127,11 +137,23 @@ print("See CLAUDE.md for roadmap.")
 Teleport.setupAutoTeleport()
 
 -- ============================================
--- TODO: LOAD UI MODULES
+-- CREATE UI
 -- ============================================
 
--- Phase 4: Load UI modules here when implemented
+print("")
+print("🎨 Creating UI...")
+
+local success, err = pcall(function()
+    MainWindow.create()
+end)
+
+if success then
+    print("✅ UI created successfully!")
+else
+    warn("❌ UI creation failed:", err)
+    print("⚠️  Features still available via console")
+end
 
 print("")
-print("🎯 Script initialization complete!")
-print("📌 Features available but need UI to activate")
+print("🎯 Zivi Hub loaded!")
+print("📌 Discord Dark Theme Active")
