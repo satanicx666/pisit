@@ -603,7 +603,7 @@ Enable Roblox Developer Console: `F9` atau `/console`
 
 ## Next Steps
 
-Untuk refactoring script ini menjadi modular, lihat file **[CLAUDE.md](./CLAUDE.md)** yang berisi:
+Untuk refactoring script ini menjadi modular, lihat file **[CLAUDE.md](./docs/CLAUDE.md)** yang berisi:
 
 - Detailed refactoring roadmap
 - Modular architecture design
