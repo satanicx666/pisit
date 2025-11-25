@@ -17,7 +17,7 @@ local PlayerUtils = require("src/utils/player-utils")
 local Teleport = {}
 
 -- Position save file
-local SAVE_FILE = "FishIt/SavedPosition.json"
+local SAVE_FILE = "FishIt/SavedPosition_ZIVIHUB.json"
 
 --[[
     Get location names (sorted alphabetically)

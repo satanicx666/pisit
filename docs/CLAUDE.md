@@ -1361,12 +1361,12 @@ function Config.save()
         sellMode = State.sellMode,
         webhookURL = _G.WebhookURL
     }
-    writefile("fishit-config.json", HttpService:JSONEncode(data))
+    writefile("fishit-config_ZIVIHUB.json", HttpService:JSONEncode(data))
 end
 
 function Config.load()
-    if isfile("fishit-config.json") then
-        local data = HttpService:JSONDecode(readfile("fishit-config.json"))
+    if isfile("fishit-config_ZIVIHUB.json") then
+        local data = HttpService:JSONDecode(readfile("fishit-config_ZIVIHUB.json"))
         State.autoFishEnabled = data.autoFish
         State.sellMode = data.sellMode
         _G.WebhookURL = data.webhookURL
