@@ -28,15 +28,50 @@ Services.Camera = workspace.CurrentCamera
 Services.LocalPlayer = Services.Players.LocalPlayer
 Services.PlayerGui = Services.LocalPlayer:WaitForChild("PlayerGui")
 
--- Game-specific requires
-Services.Net = Services.RS.Packages._Index["sleitnick_net@0.2.0"].net
-Services.Replion = require(Services.RS.Packages.Replion)
-Services.FishingController = require(Services.RS.Controllers.FishingController)
-Services.TradingController = require(Services.RS.Controllers.ItemTradingController)
-Services.ItemUtility = require(Services.RS.Shared.ItemUtility)
-Services.VendorUtility = require(Services.RS.Shared.VendorUtility)
-Services.PlayerStatsUtility = require(Services.RS.Shared.PlayerStatsUtility)
-Services.Effects = require(Services.RS.Shared.Effects)
-Services.NotifierFish = require(Services.RS.Controllers.TextNotificationController)
+-- Game-specific requires (with error handling)
+local function safeRequire(path, name)
+    local success, result = pcall(function()
+        return require(path)
+    end)
+    if success then
+        return result
+    else
+        warn(string.format("[Services] Failed to load %s: %s", name, tostring(result)))
+        return nil
+    end
+end
+
+local function safeGet(parent, path, name)
+    local success, result = pcall(function()
+        local current = parent
+        for part in string.gmatch(path, "[^%.]+") do
+            current = current[part]
+        end
+        return current
+    end)
+    if success then
+        return result
+    else
+        warn(string.format("[Services] Failed to get %s: %s", name, tostring(result)))
+        return nil
+    end
+end
+
+-- Try to load game-specific modules
+local netSuccess, netResult = pcall(function()
+    return Services.RS.Packages._Index["sleitnick_net@0.2.0"].net
+end)
+Services.Net = netSuccess and netResult or nil
+if not netSuccess then
+    warn("[Services] Failed to load Net:", netResult)
+end
+Services.Replion = safeRequire(Services.RS.Packages.Replion, "Replion")
+Services.FishingController = safeRequire(Services.RS.Controllers.FishingController, "FishingController")
+Services.TradingController = safeRequire(Services.RS.Controllers.ItemTradingController, "TradingController")
+Services.ItemUtility = safeRequire(Services.RS.Shared.ItemUtility, "ItemUtility")
+Services.VendorUtility = safeRequire(Services.RS.Shared.VendorUtility, "VendorUtility")
+Services.PlayerStatsUtility = safeRequire(Services.RS.Shared.PlayerStatsUtility, "PlayerStatsUtility")
+Services.Effects = safeRequire(Services.RS.Shared.Effects, "Effects")
+Services.NotifierFish = safeRequire(Services.RS.Controllers.TextNotificationController, "TextNotificationController")
 
 return Services

@@ -28,9 +28,28 @@ _G.httpRequest = httpRequest
 -- LOAD CORE MODULES
 -- ============================================
 
-local Services = require("src/core/services")
-local Constants = require("src/core/constants")
-local State = require("src/core/state")
+print("🔄 Loading core modules...")
+
+local success, Services = pcall(function() return require("src/core/services") end)
+if not success then
+    warn("❌ Failed to load Services:", Services)
+    return
+end
+print("   ✓ Services loaded")
+
+local success2, Constants = pcall(function() return require("src/core/constants") end)
+if not success2 then
+    warn("❌ Failed to load Constants:", Constants)
+    return
+end
+print("   ✓ Constants loaded")
+
+local success3, State = pcall(function() return require("src/core/state") end)
+if not success3 then
+    warn("❌ Failed to load State:", State)
+    return
+end
+print("   ✓ State loaded")
 
 -- ============================================
 -- LOAD NETWORK MODULES
@@ -114,21 +133,21 @@ print("")
 print("👤 Player:", LocalPlayer.Name)
 print("🔧 Executor: Compatible")
 print("")
-print("✅ UI modules loaded:")
-print("   - Library ✓")
-print("   - MainWindow ✓")
-print("   - FishTab ✓")
-print("   - AutoTab ✓")
-print("   - MiscTab ✓")
-print("")
-print("🎨 Theme: Discord Dark Mode")
-print("🎯 Status: Ready")
 
 -- ============================================
 -- LOAD UI MODULES
 -- ============================================
 
-local MainWindow = require("src/ui/main-window")
+print("🔄 Loading UI modules...")
+
+local uiSuccess, MainWindow = pcall(function() return require("src/ui/main-window") end)
+if not uiSuccess then
+    warn("❌ Failed to load UI modules:", MainWindow)
+    warn("⚠️  UI will not be available")
+    MainWindow = nil
+else
+    print("   ✓ MainWindow loaded")
+end
 
 -- ============================================
 -- INITIALIZE AUTO TELEPORT
@@ -141,19 +160,27 @@ Teleport.setupAutoTeleport()
 -- ============================================
 
 print("")
-print("🎨 Creating UI...")
 
-local success, err = pcall(function()
-    MainWindow.create()
-end)
+if MainWindow then
+    print("🎨 Creating UI...")
 
-if success then
-    print("✅ UI created successfully!")
+    local success, err = pcall(function()
+        MainWindow.create()
+    end)
+
+    if success then
+        print("✅ UI created successfully!")
+        print("🎨 Theme: Discord Dark Mode")
+    else
+        warn("❌ UI creation failed:", err)
+        print("⚠️  Features still available via console")
+    end
 else
-    warn("❌ UI creation failed:", err)
+    warn("⚠️  UI modules not loaded - UI unavailable")
     print("⚠️  Features still available via console")
 end
 
 print("")
-print("🎯 Zivi Hub loaded!")
-print("📌 Discord Dark Theme Active")
+print("╔═══════════════════════════════════════════════════╗")
+print("║           🎯 Zivi Hub v1.0.0 BETA Loaded!       ║")
+print("╚═══════════════════════════════════════════════════╝")

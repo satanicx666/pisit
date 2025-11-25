@@ -2,7 +2,7 @@
     ╔═══════════════════════════════════════════════════╗
     ║          Roblox FishIt Script - Bundled          ║
     ║                                                   ║
-    ║  Build Date: 2025-11-25 18:30:40                        ║
+    ║  Build Date: 2025-11-25 19:47:59                        ║
     ║  Version: 2.0.0                              ║
     ║                                                   ║
     ║  ⚠️  FOR EDUCATIONAL PURPOSES ONLY               ║
@@ -77,16 +77,51 @@ Modules["core/services"] = function()
     Services.LocalPlayer = Services.Players.LocalPlayer
     Services.PlayerGui = Services.LocalPlayer:WaitForChild("PlayerGui")
 
-    -- Game-specific requires
-    Services.Net = Services.RS.Packages._Index["sleitnick_net@0.2.0"].net
-    Services.Replion = require(Services.RS.Packages.Replion)
-    Services.FishingController = require(Services.RS.Controllers.FishingController)
-    Services.TradingController = require(Services.RS.Controllers.ItemTradingController)
-    Services.ItemUtility = require(Services.RS.Shared.ItemUtility)
-    Services.VendorUtility = require(Services.RS.Shared.VendorUtility)
-    Services.PlayerStatsUtility = require(Services.RS.Shared.PlayerStatsUtility)
-    Services.Effects = require(Services.RS.Shared.Effects)
-    Services.NotifierFish = require(Services.RS.Controllers.TextNotificationController)
+    -- Game-specific requires (with error handling)
+    local function safeRequire(path, name)
+        local success, result = pcall(function()
+            return require(path)
+        end)
+        if success then
+            return result
+        else
+            warn(string.format("[Services] Failed to load %s: %s", name, tostring(result)))
+            return nil
+        end
+    end
+
+    local function safeGet(parent, path, name)
+        local success, result = pcall(function()
+            local current = parent
+            for part in string.gmatch(path, "[^%.]+") do
+                current = current[part]
+            end
+            return current
+        end)
+        if success then
+            return result
+        else
+            warn(string.format("[Services] Failed to get %s: %s", name, tostring(result)))
+            return nil
+        end
+    end
+
+    -- Try to load game-specific modules
+    local netSuccess, netResult = pcall(function()
+        return Services.RS.Packages._Index["sleitnick_net@0.2.0"].net
+    end)
+    Services.Net = netSuccess and netResult or nil
+    if not netSuccess then
+        warn("[Services] Failed to load Net:", netResult)
+    end
+    Services.Replion = safeRequire(Services.RS.Packages.Replion, "Replion")
+    Services.FishingController = safeRequire(Services.RS.Controllers.FishingController, "FishingController")
+    Services.TradingController = safeRequire(Services.RS.Controllers.ItemTradingController, "TradingController")
+    Services.ItemUtility = safeRequire(Services.RS.Shared.ItemUtility, "ItemUtility")
+    Services.VendorUtility = safeRequire(Services.RS.Shared.VendorUtility, "VendorUtility")
+    Services.PlayerStatsUtility = safeRequire(Services.RS.Shared.PlayerStatsUtility, "PlayerStatsUtility")
+    Services.Effects = safeRequire(Services.RS.Shared.Effects, "Effects")
+    Services.NotifierFish = safeRequire(Services.RS.Controllers.TextNotificationController, "TextNotificationController")
 
     return Services
 
@@ -2109,9 +2144,28 @@ Modules["main"] = function()
     -- LOAD CORE MODULES
     -- ============================================
 
-    local Services = require("src/core/services")
-    local Constants = require("src/core/constants")
-    local State = require("src/core/state")
+    print("🔄 Loading core modules...")
+
+    local success, Services = pcall(function() return require("src/core/services") end)
+    if not success then
+        warn("❌ Failed to load Services:", Services)
+        return
+    end
+    print("   ✓ Services loaded")
+
+    local success2, Constants = pcall(function() return require("src/core/constants") end)
+    if not success2 then
+        warn("❌ Failed to load Constants:", Constants)
+        return
+    end
+    print("   ✓ Constants loaded")
+
+    local success3, State = pcall(function() return require("src/core/state") end)
+    if not success3 then
+        warn("❌ Failed to load State:", State)
+        return
+    end
+    print("   ✓ State loaded")
 
     -- ============================================
     -- LOAD NETWORK MODULES
@@ -2195,21 +2249,21 @@ Modules["main"] = function()
     print("👤 Player:", LocalPlayer.Name)
     print("🔧 Executor: Compatible")
     print("")
-    print("✅ UI modules loaded:")
-    print("   - Library ✓")
-    print("   - MainWindow ✓")
-    print("   - FishTab ✓")
-    print("   - AutoTab ✓")
-    print("   - MiscTab ✓")
-    print("")
-    print("🎨 Theme: Discord Dark Mode")
-    print("🎯 Status: Ready")
 
     -- ============================================
     -- LOAD UI MODULES
     -- ============================================
 
-    local MainWindow = require("src/ui/main-window")
+    print("🔄 Loading UI modules...")
+
+    local uiSuccess, MainWindow = pcall(function() return require("src/ui/main-window") end)
+    if not uiSuccess then
+        warn("❌ Failed to load UI modules:", MainWindow)
+        warn("⚠️  UI will not be available")
+        MainWindow = nil
+    else
+        print("   ✓ MainWindow loaded")
+    end
 
     -- ============================================
     -- INITIALIZE AUTO TELEPORT
@@ -2222,22 +2276,30 @@ Modules["main"] = function()
     -- ============================================
 
     print("")
-    print("🎨 Creating UI...")
 
-    local success, err = pcall(function()
-        MainWindow.create()
-    end)
+    if MainWindow then
+        print("🎨 Creating UI...")
 
-    if success then
-        print("✅ UI created successfully!")
+        local success, err = pcall(function()
+            MainWindow.create()
+        end)
+
+        if success then
+            print("✅ UI created successfully!")
+            print("🎨 Theme: Discord Dark Mode")
+        else
+            warn("❌ UI creation failed:", err)
+            print("⚠️  Features still available via console")
+        end
     else
-        warn("❌ UI creation failed:", err)
+        warn("⚠️  UI modules not loaded - UI unavailable")
         print("⚠️  Features still available via console")
     end
 
     print("")
-    print("🎯 Zivi Hub loaded!")
-    print("📌 Discord Dark Theme Active")
+    print("╔═══════════════════════════════════════════════════╗")
+    print("║           🎯 Zivi Hub v1.0.0 BETA Loaded!       ║")
+    print("╚═══════════════════════════════════════════════════╝")
 
 end
 
