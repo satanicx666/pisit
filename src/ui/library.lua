@@ -10,9 +10,9 @@
 
 local Library = {}
 
--- Zivi Hub Branding
--- Using text-based logo instead of image to avoid Roblox asset requirements
-Library.LogoText = "ZV"  -- Text shown in window (can be changed to any short text)
+-- Zivi Hub Logo Asset ID
+-- Using Chloe's original logo asset
+Library.LogoAssetId = "132435516080103"  -- Chloe logo asset ID
 
 -- Discord Dark Theme Colors
 Library.Theme = {
@@ -67,11 +67,10 @@ function Library.createWindow()
     end
 
     -- Create window with Discord dark theme
-    -- Note: Image parameter removed - using text-based branding instead
     local window = lib:Window({
         Title = "Zivi Hub",
         Footer = "Version 2.5.0 BETA",
-        -- Image = Library.LogoText,  -- Optional: Some UI libraries support text logos
+        Image = Library.LogoAssetId,  -- Chloe logo
         Color = Library.Theme.Primary,  -- Discord blurple
         Theme = 9542022979,
         Version = 3

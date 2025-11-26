@@ -2,7 +2,7 @@
     ╔═══════════════════════════════════════════════════╗
     ║          Roblox FishIt Script - Bundled          ║
     ║                                                   ║
-    ║  Build Date: 2025-11-26 11:18:15                        ║
+    ║  Build Date: 2025-11-26 11:25:33                        ║
     ║  Version: 2.0.0                              ║
     ║                                                   ║
     ║  ⚠️  FOR EDUCATIONAL PURPOSES ONLY               ║
@@ -1490,9 +1490,9 @@ Modules["ui/library"] = function()
     
     local Library = {}
     
-    -- Zivi Hub Branding
-    -- Using text-based logo instead of image to avoid Roblox asset requirements
-    Library.LogoText = "ZV"  -- Text shown in window (can be changed to any short text)
+    -- Zivi Hub Logo Asset ID
+    -- Using Chloe's original logo asset
+    Library.LogoAssetId = "132435516080103"  -- Chloe logo asset ID
     
     -- Discord Dark Theme Colors
     Library.Theme = {
@@ -1547,11 +1547,10 @@ Modules["ui/library"] = function()
         end
     
         -- Create window with Discord dark theme
-        -- Note: Image parameter removed - using text-based branding instead
         local window = lib:Window({
             Title = "Zivi Hub",
             Footer = "Version 2.5.0 BETA",
-            -- Image = Library.LogoText,  -- Optional: Some UI libraries support text logos
+            Image = Library.LogoAssetId,  -- Chloe logo
             Color = Library.Theme.Primary,  -- Discord blurple
             Theme = 9542022979,
             Version = 3
@@ -3934,29 +3933,30 @@ Modules["ui/main-window"] = function()
         end
     
         -- Create tabs
+        -- Icon can be string name OR rbxassetid
         tabs.fish = window:AddTab({
             Name = "Fishing",
-            Icon = "rbxassetid://97167558235554"  -- Fish icon
+            Icon = "rbxassetid://97167558235554"
         })
     
         tabs.trade = window:AddTab({
             Name = "Trading",
-            Icon = "rbxassetid://114581487428395"  -- Trade icon
+            Icon = "rbxassetid://114581487428395"
         })
     
         tabs.teleport = window:AddTab({
-            Name = "Teleport & Position",
-            Icon = "rbxassetid://18648122722"  -- Teleport icon
+            Name = "Teleport",
+            Icon = "rbxassetid://18648122722"
         })
     
         tabs.webhook = window:AddTab({
             Name = "Webhook",
-            Icon = "rbxassetid://137601480983962"  -- Webhook icon
+            Icon = "rbxassetid://137601480983962"
         })
     
         tabs.misc = window:AddTab({
             Name = "Misc",
-            Icon = "rbxassetid://6034509993"  -- Settings icon
+            Icon = "rbxassetid://6034509993"
         })
     
         -- Setup tabs

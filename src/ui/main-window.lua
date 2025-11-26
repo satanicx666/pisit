@@ -39,29 +39,30 @@ function MainWindow.create()
     end
 
     -- Create tabs
+    -- Icon can be string name OR rbxassetid
     tabs.fish = window:AddTab({
         Name = "Fishing",
-        Icon = "rbxassetid://97167558235554"  -- Fish icon
+        Icon = "rbxassetid://97167558235554"
     })
 
     tabs.trade = window:AddTab({
         Name = "Trading",
-        Icon = "rbxassetid://114581487428395"  -- Trade icon
+        Icon = "rbxassetid://114581487428395"
     })
 
     tabs.teleport = window:AddTab({
-        Name = "Teleport & Position",
-        Icon = "rbxassetid://18648122722"  -- Teleport icon
+        Name = "Teleport",
+        Icon = "rbxassetid://18648122722"
     })
 
     tabs.webhook = window:AddTab({
         Name = "Webhook",
-        Icon = "rbxassetid://137601480983962"  -- Webhook icon
+        Icon = "rbxassetid://137601480983962"
     })
 
     tabs.misc = window:AddTab({
         Name = "Misc",
-        Icon = "rbxassetid://6034509993"  -- Settings icon
+        Icon = "rbxassetid://6034509993"
     })
 
     -- Setup tabs
