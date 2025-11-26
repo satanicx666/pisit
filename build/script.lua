@@ -2,7 +2,7 @@
     ╔═══════════════════════════════════════════════════╗
     ║          Roblox FishIt Script - Bundled          ║
     ║                                                   ║
-    ║  Build Date: 2025-11-26 02:16:11                        ║
+    ║  Build Date: 2025-11-26 02:28:30                        ║
     ║  Version: 2.0.0                              ║
     ║                                                   ║
     ║  ⚠️  FOR EDUCATIONAL PURPOSES ONLY               ║
@@ -1575,6 +1575,246 @@ Modules["ui/library"] = function()
 
 end
 
+-- Module: features/fishing/legit-fish
+Modules["features/fishing/legit-fish"] = function()
+    -- src/features/fishing/legit-fish.lua
+    -- Legit fishing with auto shake (follows game mechanics)
+
+    local Services = require("src/core/services")
+    local State = require("src/core/state")
+
+    local LegitFish = {}
+
+    -- Auto shake delay
+    State.shakeDelay = 0
+
+    -- Auto shake enabled flag
+    State.autoShake = false
+
+    -- Start auto shake (spam click during fishing)
+    function LegitFish.startAutoShake()
+        if not State.autoShake then
+            return
+        end
+
+        -- Disable click effect GUI
+        local clickEffect = Services.PlayerGui:FindFirstChild("!!! Click Effect")
+        if clickEffect then
+            clickEffect.Enabled = false
+        end
+
+        task.spawn(function()
+            while State.autoShake do
+                pcall(function()
+                    if Services.FishingController then
+                        Services.FishingController:RequestFishingMinigameClick()
+                    end
+                end)
+                task.wait(State.shakeDelay)
+            end
+
+            -- Re-enable click effect when stopped
+            if clickEffect then
+                clickEffect.Enabled = true
+            end
+        end)
+
+        print("[Legit Fish] Auto shake started (delay:", State.shakeDelay, ")")
+    end
+
+    -- Stop auto shake
+    function LegitFish.stopAutoShake()
+        State.autoShake = false
+
+        -- Re-enable click effect
+        local clickEffect = Services.PlayerGui:FindFirstChild("!!! Click Effect")
+        if clickEffect then
+            clickEffect.Enabled = true
+        end
+
+        print("[Legit Fish] Auto shake stopped")
+    end
+
+    -- Set shake delay
+    function LegitFish.setShakeDelay(delay)
+        local delayNum = tonumber(delay)
+        if delayNum and delayNum >= 0 then
+            State.shakeDelay = delayNum
+            print("[Legit Fish] Shake delay set to:", delayNum)
+            return true
+        end
+        return false
+    end
+
+    -- Start legit fishing (using FishingController)
+    function LegitFish.start()
+        if State.legitFishing then
+            return
+        end
+
+        State.legitFishing = true
+
+        task.spawn(function()
+            while State.legitFishing do
+                -- Let the game's normal fishing controller handle the fishing
+                -- This just keeps the loop alive for monitoring
+                task.wait(1)
+            end
+        end)
+
+        print("[Legit Fish] Legit fishing started")
+    end
+
+    -- Stop legit fishing
+    function LegitFish.stop()
+        State.legitFishing = false
+        print("[Legit Fish] Legit fishing stopped")
+    end
+
+    return LegitFish
+
+end
+
+-- Module: features/fishing/blatant-fish
+Modules["features/fishing/blatant-fish"] = function()
+    -- src/features/fishing/blatant-fish.lua
+    -- Blatant fishing (aggressive, obvious method)
+
+    local Services = require("src/core/services")
+    local State = require("src/core/state")
+    local Functions = require("src/network/functions")
+    local Events = require("src/network/events")
+
+    local BlatantFish = {}
+
+    -- Blatant fishing state
+    State.blatantFishing = false
+    State.blatantMode = "Fast" -- "Fast" or "Random Result"
+    State.reelDelay = 0.5 -- Delay between catches
+
+    -- Fast mode: Fastest possible fishing
+    local function fishFast()
+        task.spawn(function()
+            -- Cancel any ongoing fishing
+            pcall(function()
+                Functions.Cancel:InvokeServer()
+            end)
+
+            -- Get server time and charge rod
+            local serverTime = workspace:GetServerTimeNow()
+            pcall(function()
+                Functions.ChargeRod:InvokeServer(serverTime)
+            end)
+
+            -- Start minigame with max power
+            pcall(function()
+                Functions.StartMini:InvokeServer(-1, 0.999)
+            end)
+
+            -- Wait fishing delay
+            task.wait(_G.FishingDelay or 0.1)
+
+            -- Complete fishing
+            pcall(function()
+                Events.REFishDone:FireServer()
+            end)
+        end)
+    end
+
+    -- Random Result mode: Fishing with slight delay variation
+    local function fishRandomResult()
+        task.spawn(function()
+            -- Cancel any ongoing fishing
+            pcall(function()
+                Functions.Cancel:InvokeServer()
+            end)
+
+            -- Get server time and charge rod
+            local serverTime = workspace:GetServerTimeNow()
+            pcall(function()
+                Functions.ChargeRod:InvokeServer(serverTime)
+            end)
+
+            -- Wait a bit before starting (makes it less obvious)
+            task.wait(0.2)
+
+            -- Start minigame with max power
+            pcall(function()
+                Functions.StartMini:InvokeServer(-1, 0.999)
+            end)
+
+            -- Wait fishing delay
+            task.wait(_G.FishingDelay or 0.1)
+
+            -- Complete fishing
+            pcall(function()
+                Events.REFishDone:FireServer()
+            end)
+        end)
+    end
+
+    -- Start blatant fishing
+    function BlatantFish.start()
+        if State.blatantFishing then
+            return
+        end
+
+        State.blatantFishing = true
+
+        task.spawn(function()
+            while State.blatantFishing do
+                if State.blatantMode == "Fast" then
+                    fishFast()
+                elseif State.blatantMode == "Random Result" then
+                    fishRandomResult()
+                end
+
+                task.wait(State.reelDelay)
+            end
+        end)
+
+        print("[Blatant Fish] Blatant fishing started (mode:", State.blatantMode, ")")
+    end
+
+    -- Stop blatant fishing
+    function BlatantFish.stop()
+        State.blatantFishing = false
+        print("[Blatant Fish] Blatant fishing stopped")
+    end
+
+    -- Set blatant mode
+    function BlatantFish.setMode(mode)
+        if mode == "Fast" or mode == "Random Result" then
+            State.blatantMode = mode
+            print("[Blatant Fish] Mode set to:", mode)
+            return true
+        end
+        return false
+    end
+
+    -- Set reel delay
+    function BlatantFish.setReelDelay(delay)
+        local delayNum = tonumber(delay)
+        if delayNum and delayNum >= 0 then
+            State.reelDelay = delayNum
+            print("[Blatant Fish] Reel delay set to:", delayNum)
+            return true
+        end
+        return false
+    end
+
+    -- Recovery fishing (cancel stuck fishing)
+    function BlatantFish.recovery()
+        pcall(function()
+            Functions.Cancel:InvokeServer()
+        end)
+        print("[Blatant Fish] Recovery executed")
+    end
+
+    return BlatantFish
+
+end
+
 -- Module: ui/tabs/fish-tab
 Modules["ui/tabs/fish-tab"] = function()
     --[[
@@ -1588,6 +1828,8 @@ Modules["ui/tabs/fish-tab"] = function()
     ]]
 
     local InstantFish = require("src/features/fishing/instant-fish")
+    local LegitFish = require("src/features/fishing/legit-fish")
+    local BlatantFish = require("src/features/fishing/blatant-fish")
     local State = require("src/core/state")
 
     local FishTab = {}
@@ -1662,18 +1904,109 @@ Modules["ui/tabs/fish-tab"] = function()
             end
         end)
 
+        -- Legit Fishing Section
+        local legitSection = tab:AddSection("Legit Fishing")
+
+        -- Auto Shake Toggle
+        legitSection:AddToggle({
+            Title = "Auto Shake",
+            Content = "Spam click during fishing (works with legit mode)",
+            Default = false,
+            Callback = function(enabled)
+                State.autoShake = enabled
+                if enabled then
+                    LegitFish.startAutoShake()
+                    print("[Fish Tab] Auto shake enabled")
+                else
+                    LegitFish.stopAutoShake()
+                    print("[Fish Tab] Auto shake disabled")
+                end
+            end
+        })
+
+        -- Shake Delay Input
+        legitSection:AddInput({
+            Title = "Shake Delay",
+            Content = "Delay between clicks (seconds)",
+            Value = "0",
+            Callback = function(value)
+                LegitFish.setShakeDelay(value)
+            end
+        })
+
+        -- Blatant Fishing Section
+        local blatantSection = tab:AddSection("Blatant Fishing")
+
+        -- Blatant Mode Dropdown
+        blatantSection:AddDropdown({
+            Title = "Blatant Mode",
+            Options = {"Fast", "Random Result"},
+            Multi = false,
+            Callback = function(mode)
+                BlatantFish.setMode(mode)
+                print("[Fish Tab] Blatant mode:", mode)
+            end
+        })
+
+        -- Reel Delay Input
+        blatantSection:AddInput({
+            Title = "Reel Delay",
+            Content = "Delay between catches (seconds)",
+            Value = "0.5",
+            Callback = function(value)
+                BlatantFish.setReelDelay(value)
+            end
+        })
+
+        -- Blatant Fishing Toggle
+        blatantSection:AddToggle({
+            Title = "Enable Blatant Fishing",
+            Content = "Aggressive fishing method (HIGH DETECTION RISK)",
+            Default = false,
+            Callback = function(enabled)
+                if enabled then
+                    BlatantFish.start()
+                    print("[Fish Tab] Blatant fishing started")
+                else
+                    BlatantFish.stop()
+                    print("[Fish Tab] Blatant fishing stopped")
+                end
+            end
+        })
+
+        -- Recovery Button
+        blatantSection:AddButton({
+            Title = "Recovery Fishing",
+            Content = "Cancel stuck fishing state",
+            Callback = function()
+                BlatantFish.recovery()
+                print("[Fish Tab] Recovery executed")
+            end
+        })
+
         -- Info Section
         local infoSection = tab:AddSection("Information")
 
         infoSection:AddParagraph({
-            Title = "How to Use",
+            Title = "Fishing Modes",
             Content = [[
-    1. Toggle 'Instant Fishing' to start
-    2. Script will auto catch fish
-    3. Adjust delay if needed (default: 0s)
-    4. Monitor stats below
+    INSTANT FISHING:
+    - Bypasses minigame completely
+    - Fast and efficient
+    - Medium detection risk
 
-    WARNING: May be detected!
+    LEGIT FISHING:
+    - Uses game's normal fishing
+    - Auto Shake: spam clicks
+    - Lower detection risk
+
+    BLATANT FISHING:
+    - Aggressive method
+    - Fast mode: Fastest possible
+    - Random Result: Slight delay
+    - HIGH DETECTION RISK
+
+    WARNING: All methods risk ban!
     Use at your own risk.
             ]]
         })
@@ -2970,7 +3303,7 @@ Modules["ui/tabs/webhook-tab"] = function()
             -- Send webhook
             local embed = {
                 content = State.webhook.discordMention or "",
-                embeds = {{
+                embeds = { {
                     title = "Fish Caught",
                     description = string.format("**%s**\nRarity: **%s**\nVariant: %s\nPlayer: %s",
                         fishName, rarity, variant, playerName),
@@ -2984,7 +3317,7 @@ Modules["ui/tabs/webhook-tab"] = function()
                     footer = {
                         text = "Zivi Hub Webhook"
                     }
-                }}
+                } }
             }
 
             task.spawn(function()
@@ -3105,11 +3438,11 @@ Modules["ui/tabs/webhook-tab"] = function()
             end
         })
 
-        -- Mythic Toggle (Default ON)
+        -- Mythic Toggle (Default OFF)
         raritySection:AddToggle({
             Title = "Mythic",
             Content = "Send webhook for Mythic fish",
-            Default = true,
+            Default = false,
             Callback = function(enabled)
                 State.webhook.selectedRarities.Mythic = enabled
                 print("[Webhook] Mythic notifications:", enabled)
@@ -3144,7 +3477,7 @@ Modules["ui/tabs/webhook-tab"] = function()
 
                 local success = Webhook.send(State.webhook.url, {
                     content = State.webhook.discordMention or "",
-                    embeds = {{
+                    embeds = { {
                         title = "Test Webhook",
                         description = string.format("Webhook is working correctly!\n\nPlayer: %s\nHide Identifier: %s",
                             playerName,
@@ -3155,7 +3488,7 @@ Modules["ui/tabs/webhook-tab"] = function()
                         footer = {
                             text = "Zivi Hub Webhook Test"
                         }
-                    }}
+                    } }
                 })
 
                 if success then

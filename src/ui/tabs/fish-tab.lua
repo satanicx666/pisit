@@ -9,6 +9,8 @@
 ]]
 
 local InstantFish = require("src/features/fishing/instant-fish")
+local LegitFish = require("src/features/fishing/legit-fish")
+local BlatantFish = require("src/features/fishing/blatant-fish")
 local State = require("src/core/state")
 
 local FishTab = {}
@@ -83,18 +85,109 @@ function FishTab.setup(tab)
         end
     end)
 
+    -- Legit Fishing Section
+    local legitSection = tab:AddSection("Legit Fishing")
+
+    -- Auto Shake Toggle
+    legitSection:AddToggle({
+        Title = "Auto Shake",
+        Content = "Spam click during fishing (works with legit mode)",
+        Default = false,
+        Callback = function(enabled)
+            State.autoShake = enabled
+            if enabled then
+                LegitFish.startAutoShake()
+                print("[Fish Tab] Auto shake enabled")
+            else
+                LegitFish.stopAutoShake()
+                print("[Fish Tab] Auto shake disabled")
+            end
+        end
+    })
+
+    -- Shake Delay Input
+    legitSection:AddInput({
+        Title = "Shake Delay",
+        Content = "Delay between clicks (seconds)",
+        Value = "0",
+        Callback = function(value)
+            LegitFish.setShakeDelay(value)
+        end
+    })
+
+    -- Blatant Fishing Section
+    local blatantSection = tab:AddSection("Blatant Fishing")
+
+    -- Blatant Mode Dropdown
+    blatantSection:AddDropdown({
+        Title = "Blatant Mode",
+        Options = {"Fast", "Random Result"},
+        Multi = false,
+        Callback = function(mode)
+            BlatantFish.setMode(mode)
+            print("[Fish Tab] Blatant mode:", mode)
+        end
+    })
+
+    -- Reel Delay Input
+    blatantSection:AddInput({
+        Title = "Reel Delay",
+        Content = "Delay between catches (seconds)",
+        Value = "0.5",
+        Callback = function(value)
+            BlatantFish.setReelDelay(value)
+        end
+    })
+
+    -- Blatant Fishing Toggle
+    blatantSection:AddToggle({
+        Title = "Enable Blatant Fishing",
+        Content = "Aggressive fishing method (HIGH DETECTION RISK)",
+        Default = false,
+        Callback = function(enabled)
+            if enabled then
+                BlatantFish.start()
+                print("[Fish Tab] Blatant fishing started")
+            else
+                BlatantFish.stop()
+                print("[Fish Tab] Blatant fishing stopped")
+            end
+        end
+    })
+
+    -- Recovery Button
+    blatantSection:AddButton({
+        Title = "Recovery Fishing",
+        Content = "Cancel stuck fishing state",
+        Callback = function()
+            BlatantFish.recovery()
+            print("[Fish Tab] Recovery executed")
+        end
+    })
+
     -- Info Section
     local infoSection = tab:AddSection("Information")
 
     infoSection:AddParagraph({
-        Title = "How to Use",
+        Title = "Fishing Modes",
         Content = [[
-1. Toggle 'Instant Fishing' to start
-2. Script will auto catch fish
-3. Adjust delay if needed (default: 0s)
-4. Monitor stats below
+INSTANT FISHING:
+- Bypasses minigame completely
+- Fast and efficient
+- Medium detection risk
 
-WARNING: May be detected!
+LEGIT FISHING:
+- Uses game's normal fishing
+- Auto Shake: spam clicks
+- Lower detection risk
+
+BLATANT FISHING:
+- Aggressive method
+- Fast mode: Fastest possible
+- Random Result: Slight delay
+- HIGH DETECTION RISK
+
+WARNING: All methods risk ban!
 Use at your own risk.
         ]]
     })

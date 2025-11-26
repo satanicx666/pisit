@@ -43,7 +43,7 @@ local function setupFishCaughtHook()
         -- Send webhook
         local embed = {
             content = State.webhook.discordMention or "",
-            embeds = {{
+            embeds = { {
                 title = "Fish Caught",
                 description = string.format("**%s**\nRarity: **%s**\nVariant: %s\nPlayer: %s",
                     fishName, rarity, variant, playerName),
@@ -57,7 +57,7 @@ local function setupFishCaughtHook()
                 footer = {
                     text = "Zivi Hub Webhook"
                 }
-            }}
+            } }
         }
 
         task.spawn(function()
@@ -178,11 +178,11 @@ function WebhookTab.setup(tab)
         end
     })
 
-    -- Mythic Toggle (Default ON)
+    -- Mythic Toggle (Default OFF)
     raritySection:AddToggle({
         Title = "Mythic",
         Content = "Send webhook for Mythic fish",
-        Default = true,
+        Default = false,
         Callback = function(enabled)
             State.webhook.selectedRarities.Mythic = enabled
             print("[Webhook] Mythic notifications:", enabled)
@@ -217,7 +217,7 @@ function WebhookTab.setup(tab)
 
             local success = Webhook.send(State.webhook.url, {
                 content = State.webhook.discordMention or "",
-                embeds = {{
+                embeds = { {
                     title = "Test Webhook",
                     description = string.format("Webhook is working correctly!\n\nPlayer: %s\nHide Identifier: %s",
                         playerName,
@@ -228,7 +228,7 @@ function WebhookTab.setup(tab)
                     footer = {
                         text = "Zivi Hub Webhook Test"
                     }
-                }}
+                } }
             })
 
             if success then
