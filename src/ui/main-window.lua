@@ -10,7 +10,6 @@
 
 local Library = require("src/ui/library")
 local FishTab = require("src/ui/tabs/fish-tab")
-local AutoTab = require("src/ui/tabs/auto-tab")
 local TradeTab = require("src/ui/tabs/trade-tab")
 local TeleportTab = require("src/ui/tabs/teleport-tab")
 local WebhookTab = require("src/ui/tabs/webhook-tab")
@@ -45,11 +44,6 @@ function MainWindow.create()
         Icon = "rbxassetid://97167558235554"
     })
 
-    tabs.auto = window:AddTab({
-        Name = "Automation",
-        Icon = "settings"
-    })
-
     tabs.trade = window:AddTab({
         Name = "Trading",
         Icon = "shuffle"
@@ -72,7 +66,6 @@ function MainWindow.create()
 
     -- Setup tabs
     FishTab.setup(tabs.fish)
-    AutoTab.setup(tabs.auto)
     TradeTab.setup(tabs.trade)
     TeleportTab.setup(tabs.teleport)
     WebhookTab.setup(tabs.webhook)
