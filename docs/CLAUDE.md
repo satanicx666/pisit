@@ -43,7 +43,7 @@
 💾 Bundle Size:       96.40 KB
 🎨 Theme:            Discord Dark Mode
 🔧 Build System:     Node.js bundler
-📁 File Naming:      *_ZIVIHUB.json suffix
+📁 File Naming:      ZiviHub/*_ZIVIHUB.json (separate folder)
 💎 Trading:          Fully Implemented
 ```
 

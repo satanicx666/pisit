@@ -16,8 +16,8 @@ local PlayerUtils = require("src/utils/player-utils")
 
 local Teleport = {}
 
--- Position save file
-local SAVE_FILE = "FishIt/SavedPosition_ZIVIHUB.json"
+-- Position save file (completely separate from old script)
+local SAVE_FILE = "ZiviHub/SavedPosition_ZIVIHUB.json"
 
 --[[
     Get location names (sorted alphabetically)
@@ -124,7 +124,7 @@ function Teleport.savePosition()
     end
 
     -- Save CFrame components
-    local components = {hrp.CFrame:GetComponents()}
+    local components = { hrp.CFrame:GetComponents() }
 
     local success = pcall(function()
         writefile(SAVE_FILE, Services.HttpService:JSONEncode(components))

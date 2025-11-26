@@ -2,7 +2,7 @@
     ╔═══════════════════════════════════════════════════╗
     ║          Roblox FishIt Script - Bundled          ║
     ║                                                   ║
-    ║  Build Date: 2025-11-25 20:09:29                        ║
+    ║  Build Date: 2025-11-26 02:00:30                        ║
     ║  Version: 2.0.0                              ║
     ║                                                   ║
     ║  ⚠️  FOR EDUCATIONAL PURPOSES ONLY               ║
@@ -1258,8 +1258,8 @@ Modules["features/teleport/teleport"] = function()
 
     local Teleport = {}
 
-    -- Position save file
-    local SAVE_FILE = "FishIt/SavedPosition_ZIVIHUB.json"
+    -- Position save file (completely separate from old script)
+    local SAVE_FILE = "ZiviHub/SavedPosition_ZIVIHUB.json"
 
     --[[
         Get location names (sorted alphabetically)
@@ -1366,7 +1366,7 @@ Modules["features/teleport/teleport"] = function()
         end
 
         -- Save CFrame components
-        local components = {hrp.CFrame:GetComponents()}
+        local components = { hrp.CFrame:GetComponents() }
 
         local success = pcall(function()
             writefile(SAVE_FILE, Services.HttpService:JSONEncode(components))
