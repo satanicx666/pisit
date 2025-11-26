@@ -2,7 +2,7 @@
     ╔═══════════════════════════════════════════════════╗
     ║          Roblox FishIt Script - Bundled          ║
     ║                                                   ║
-    ║  Build Date: 2025-11-26 11:10:34                        ║
+    ║  Build Date: 2025-11-26 11:11:11                        ║
     ║  Version: 2.0.0                              ║
     ║                                                   ║
     ║  ⚠️  FOR EDUCATIONAL PURPOSES ONLY               ║
@@ -3943,27 +3943,22 @@ Modules["ui/main-window"] = function()
         -- Create tabs
         tabs.fish = window:AddTab({
             Name = "Fishing",
-            Icon = "rbxassetid://97167558235554"
         })
     
         tabs.trade = window:AddTab({
             Name = "Trading",
-            Icon = "shuffle"
         })
     
         tabs.teleport = window:AddTab({
             Name = "Teleport & Position",
-            Icon = "map-pin"
         })
     
         tabs.webhook = window:AddTab({
             Name = "Webhook",
-            Icon = "bell"
         })
     
         tabs.misc = window:AddTab({
             Name = "Misc",
-            Icon = "wrench"
         })
     
         -- Setup tabs
