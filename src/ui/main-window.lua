@@ -38,12 +38,17 @@ function MainWindow.create()
         error("[MainWindow] Failed to create window")
     end
 
+    print("[MainWindow] Window created, type:", type(window))
+    print("[MainWindow] AddTab method exists:", type(window.AddTab))
+
     -- Create tabs
     -- Icon can be string name OR rbxassetid
+    print("[MainWindow] Creating Fishing tab...")
     tabs.fish = window:AddTab({
         Name = "Fishing",
         Icon = "rbxassetid://97167558235554"
     })
+    print("[MainWindow] Fishing tab created:", tabs.fish ~= nil)
 
     tabs.trade = window:AddTab({
         Name = "Trading",
