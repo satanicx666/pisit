@@ -116,13 +116,57 @@ function FishTab.setup(tab)
     -- Legit Fishing Section
     local legitSection = tab:AddSection("Legit Fishing")
 
+    -- Legit Mode Dropdown
+    legitSection:AddDropdown({
+        Title = "Legit Mode",
+        Options = {"Always Perfect", "Normal"},
+        Default = "Always Perfect",
+        Multi = false,
+        Callback = function(mode)
+            LegitFish.setMode(mode)
+            print("[Fish Tab] Legit mode:", mode)
+        end
+    })
+
+    -- Fishing Delay Input
+    legitSection:AddInput({
+        Title = "Fishing Delay",
+        Content = "Delay before completing minigame (seconds)",
+        Value = tostring(_G.Delay or 0),
+        Callback = function(value)
+            local delay = tonumber(value)
+            if delay and delay >= 0 then
+                _G.Delay = delay
+                print("[Fish Tab] Fishing delay set to:", delay)
+            end
+        end
+    })
+
+    -- Legit Fishing Toggle
+    legitSection:AddToggle({
+        Title = "Enable Legit Fishing",
+        Content = "Auto fishing with game mechanics",
+        Default = false,
+        Callback = function(enabled)
+            if enabled then
+                LegitFish.start()
+                print("[Fish Tab] Legit fishing started")
+            else
+                LegitFish.stop()
+                print("[Fish Tab] Legit fishing stopped")
+            end
+        end
+    })
+
+    legitSection:AddDivider()
+
     -- Auto Shake Toggle
     legitSection:AddToggle({
         Title = "Auto Shake",
-        Content = "Spam click during fishing (works with legit mode)",
+        Content = "Spam click during fishing (independent feature)",
         Default = false,
         Callback = function(enabled)
-            State.autoShake = enabled
+            _G.ShakeEnabled = enabled
             if enabled then
                 LegitFish.startAutoShake()
                 print("[Fish Tab] Auto shake enabled")
@@ -327,15 +371,16 @@ function FishTab.setup(tab)
 
     infoSection:AddParagraph({
         Title = "Fishing Modes",
-        Content = [[
+Content = [[
 INSTANT FISHING:
 - Bypasses minigame completely
 - Fast and efficient
 - Medium detection risk
 
 LEGIT FISHING:
-- Uses game's normal fishing
-- Auto Shake: spam clicks
+- Always Perfect: Auto cast + perfect catch
+- Normal: Power override + auto cast
+- Auto Shake: Independent spam click
 - Lower detection risk
 
 BLATANT FISHING:
