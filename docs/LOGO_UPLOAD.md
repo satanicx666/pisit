@@ -67,6 +67,26 @@ If you really want to use the image logo:
 - ✅ **No upload required:** Works immediately
 - ✅ **Image file preserved:** Available at `src/zivi-logo.jpg` for future use
 
+## Important: Window Image vs Tab Icons
+
+**Key Difference:**
+```lua
+-- WINDOW IMAGE (Optional)
+Window({
+    Image = "132435516080103",  -- Numbers only, optional
+})
+
+-- TAB ICONS (Required!)
+AddTab({
+    Icon = "rbxassetid://97167558235554",  -- rbxassetid:// prefix, REQUIRED
+})
+```
+
+**Why Tab Icons Different?**
+- **Window Image**: Optional parameter, numbers only
+- **Tab Icons**: REQUIRED parameter, supports `rbxassetid://` prefix
+- **Without Icon**: Tabs won't render at all (blank UI)
+
 ## Why Text Instead of Image?
 
 **Technical Limitations:**
@@ -88,6 +108,16 @@ Image = "https://i.imgur.com/abc.jpg"  -- Not supported
 ```
 
 ## Troubleshooting
+
+### Tabs Not Showing / Blank UI?
+**Problem:** Removed Icon parameter from tabs
+**Solution:** Tab icons are REQUIRED - restore them:
+```lua
+tabs.fish = window:AddTab({
+    Name = "Fishing",
+    Icon = "rbxassetid://97167558235554"  -- REQUIRED!
+})
+```
 
 ### Text Logo Not Showing?
 - The UI library may not support text logos in the Image parameter
