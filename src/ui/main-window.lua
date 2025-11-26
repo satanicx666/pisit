@@ -41,27 +41,22 @@ function MainWindow.create()
     -- Create tabs
     tabs.fish = window:AddTab({
         Name = "Fishing",
-        Icon = "rbxassetid://97167558235554"
     })
 
     tabs.trade = window:AddTab({
         Name = "Trading",
-        Icon = "shuffle"
     })
 
     tabs.teleport = window:AddTab({
         Name = "Teleport & Position",
-        Icon = "map-pin"
     })
 
     tabs.webhook = window:AddTab({
         Name = "Webhook",
-        Icon = "bell"
     })
 
     tabs.misc = window:AddTab({
         Name = "Misc",
-        Icon = "wrench"
     })
 
     -- Setup tabs
