@@ -55,7 +55,7 @@ end
 function Webhook.sendFishCaught(webhookUrl, fishName, rarity, variant)
     local embed = {
         embeds = {{
-            title = "🎣 Fish Caught!",
+            title = "[FISH] Fish Caught!",
             description = string.format("**%s**\nRarity: %s\nVariant: %s",
                 fishName, rarity, variant or "None"),
             color = 0x00ff00,
@@ -76,7 +76,7 @@ function Webhook.sendDisconnect(webhookUrl, reason, customName)
     local embed = {
         content = _G.DiscordMention or "",
         embeds = {{
-            title = "⚠️ Disconnected",
+            title = "[WARNING] Disconnected",
             description = string.format("**%s** disconnected\nReason: %s",
                 customName or "Player", reason),
             color = 0xff0000,
@@ -96,7 +96,7 @@ end
 ]]
 function Webhook.sendTrade(webhookUrl, itemName, targetPlayer, success)
     local color = success and 0x00ff00 or 0xff0000
-    local title = success and "✅ Trade Success" or "❌ Trade Failed"
+    local title = success and "[SUCCESS] Trade Success" or "[FAILED] Trade Failed"
 
     local embed = {
         embeds = {{

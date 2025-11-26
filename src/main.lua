@@ -108,30 +108,30 @@ print("║                   Zivi Hub                       ║")
 print("║              Version 1.0.0 BETA                  ║")
 print("╚═══════════════════════════════════════════════════╝")
 print("")
-print("✅ Core modules loaded:")
+print("[OK] Core modules loaded:")
 print("   - Services ✓")
 print("   - Constants ✓")
 print("   - State ✓")
 print("")
-print("✅ Network modules loaded:")
+print("[OK] Network modules loaded:")
 print("   - Events ✓")
 print("   - Functions ✓")
 print("   - Webhook ✓")
 print("")
-print("✅ Utility modules loaded:")
+print("[OK] Utility modules loaded:")
 print("   - PlayerUtils ✓")
 print("")
-print("✅ Feature modules loaded:")
+print("[OK] Feature modules loaded:")
 print("   - InstantFish ✓")
 print("   - AutoSell ✓")
 print("   - AutoFavorite ✓")
 print("   - Teleport ✓")
 print("")
-print("✅ Config modules loaded:")
+print("[OK] Config modules loaded:")
 print("   - Locations ✓")
 print("")
 print("👤 Player:", LocalPlayer.Name)
-print("🔧 Executor: Compatible")
+print("[INFO] Executor: Compatible")
 print("")
 
 -- ============================================
@@ -143,7 +143,7 @@ print("🔄 Loading UI modules...")
 local uiSuccess, MainWindow = pcall(function() return require("src/ui/main-window") end)
 if not uiSuccess then
     warn("❌ Failed to load UI modules:", MainWindow)
-    warn("⚠️  UI will not be available")
+    warn("[WARNING] UI will not be available")
     MainWindow = nil
 else
     print("   ✓ MainWindow loaded")
@@ -169,15 +169,15 @@ if MainWindow then
     end)
 
     if success then
-        print("✅ UI created successfully!")
+        print("[OK] UI created successfully!")
         print("🎨 Theme: Discord Dark Mode")
     else
         warn("❌ UI creation failed:", err)
-        print("⚠️  Features still available via console")
+        print("[WARNING] Features still available via console")
     end
 else
-    warn("⚠️  UI modules not loaded - UI unavailable")
-    print("⚠️  Features still available via console")
+    warn("[WARNING] UI modules not loaded - UI unavailable")
+    print("[WARNING] Features still available via console")
 end
 
 print("")

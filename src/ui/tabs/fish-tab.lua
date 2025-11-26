@@ -19,7 +19,7 @@ local FishTab = {}
 ]]
 function FishTab.setup(tab)
     -- Fishing Features Section
-    local fishingSection = tab:AddSection("⚡ Instant Fishing")
+    local fishingSection = tab:AddSection("Instant Fishing")
 
     -- Instant Fishing Toggle
     fishingSection:AddToggle({
@@ -52,7 +52,7 @@ function FishTab.setup(tab)
     })
 
     -- Fishing Stats Section
-    local statsSection = tab:AddSection("📊 Fishing Stats")
+    local statsSection = tab:AddSection("Fishing Stats")
 
     local statsLabel = statsSection:AddParagraph({
         Title = "Statistics",
@@ -84,7 +84,7 @@ function FishTab.setup(tab)
     end)
 
     -- Info Section
-    local infoSection = tab:AddSection("ℹ️ Information")
+    local infoSection = tab:AddSection("Information")
 
     infoSection:AddParagraph({
         Title = "How to Use",
@@ -94,7 +94,7 @@ function FishTab.setup(tab)
 3. Adjust delay if needed (default: 0s)
 4. Monitor stats below
 
-⚠️ Warning: May be detected!
+WARNING: May be detected!
 Use at your own risk.
         ]]
     })

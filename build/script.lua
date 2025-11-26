@@ -2,7 +2,7 @@
     ╔═══════════════════════════════════════════════════╗
     ║          Roblox FishIt Script - Bundled          ║
     ║                                                   ║
-    ║  Build Date: 2025-11-26 02:00:30                        ║
+    ║  Build Date: 2025-11-26 02:09:25                        ║
     ║  Version: 2.0.0                              ║
     ║                                                   ║
     ║  ⚠️  FOR EDUCATIONAL PURPOSES ONLY               ║
@@ -479,7 +479,7 @@ Modules["network/webhook"] = function()
     function Webhook.sendFishCaught(webhookUrl, fishName, rarity, variant)
         local embed = {
             embeds = {{
-                title = "🎣 Fish Caught!",
+                title = "[FISH] Fish Caught!",
                 description = string.format("**%s**\nRarity: %s\nVariant: %s",
                     fishName, rarity, variant or "None"),
                 color = 0x00ff00,
@@ -500,7 +500,7 @@ Modules["network/webhook"] = function()
         local embed = {
             content = _G.DiscordMention or "",
             embeds = {{
-                title = "⚠️ Disconnected",
+                title = "[WARNING] Disconnected",
                 description = string.format("**%s** disconnected\nReason: %s",
                     customName or "Player", reason),
                 color = 0xff0000,
@@ -520,7 +520,7 @@ Modules["network/webhook"] = function()
     ]]
     function Webhook.sendTrade(webhookUrl, itemName, targetPlayer, success)
         local color = success and 0x00ff00 or 0xff0000
-        local title = success and "✅ Trade Success" or "❌ Trade Failed"
+        local title = success and "[SUCCESS] Trade Success" or "[FAILED] Trade Failed"
 
         local embed = {
             embeds = {{
@@ -1582,7 +1582,7 @@ Modules["ui/tabs/fish-tab"] = function()
     ]]
     function FishTab.setup(tab)
         -- Fishing Features Section
-        local fishingSection = tab:AddSection("⚡ Instant Fishing")
+        local fishingSection = tab:AddSection("Instant Fishing")
 
         -- Instant Fishing Toggle
         fishingSection:AddToggle({
@@ -1615,7 +1615,7 @@ Modules["ui/tabs/fish-tab"] = function()
         })
 
         -- Fishing Stats Section
-        local statsSection = tab:AddSection("📊 Fishing Stats")
+        local statsSection = tab:AddSection("Fishing Stats")
 
         local statsLabel = statsSection:AddParagraph({
             Title = "Statistics",
@@ -1647,7 +1647,7 @@ Modules["ui/tabs/fish-tab"] = function()
         end)
 
         -- Info Section
-        local infoSection = tab:AddSection("ℹ️ Information")
+        local infoSection = tab:AddSection("Information")
 
         infoSection:AddParagraph({
             Title = "How to Use",
@@ -1657,7 +1657,7 @@ Modules["ui/tabs/fish-tab"] = function()
     3. Adjust delay if needed (default: 0s)
     4. Monitor stats below
 
-    ⚠️ Warning: May be detected!
+    WARNING: May be detected!
     Use at your own risk.
             ]]
         })
@@ -2790,19 +2790,135 @@ Modules["ui/tabs/trade-tab"] = function()
 
 end
 
+-- Module: ui/tabs/teleport-tab
+Modules["ui/tabs/teleport-tab"] = function()
+    -- src/ui/tabs/teleport-tab.lua
+    -- Teleport & Position management tab
+
+    local Teleport = require("src/features/teleport/teleport")
+    local State = require("src/core/state")
+
+    local TeleportTab = {}
+
+    -- Selected location storage
+    local selectedLocation = nil
+
+    function TeleportTab.setup(tab)
+        -- TELEPORT TO LOCATION SECTION
+        local locationSection = tab:AddSection("Teleport to Location")
+
+        -- Get location names
+        local locationNames = Teleport.getLocationNames()
+
+        -- Location Dropdown (just select, don't teleport yet)
+        locationSection:AddDropdown({
+            Title = "Select Location",
+            Options = locationNames,
+            Multi = false,
+            Callback = function(location)
+                selectedLocation = location
+                print("[Teleport Tab] Location selected:", location)
+            end
+        })
+
+        -- Teleport Button (actual teleport happens here)
+        locationSection:AddButton({
+            Title = "Teleport to Location",
+            Content = "Click to teleport to selected location",
+            Callback = function()
+                if selectedLocation and selectedLocation ~= "" then
+                    local success = Teleport.toLocation(selectedLocation)
+                    if success then
+                        print("[Teleport Tab] Teleported to:", selectedLocation)
+                    else
+                        warn("[Teleport Tab] Teleport failed:", selectedLocation)
+                    end
+                else
+                    warn("[Teleport Tab] Please select a location first")
+                end
+            end
+        })
+
+        -- SAVE/LOAD POSITION SECTION
+        local savedPosSection = tab:AddSection("Save & Load Position")
+
+        -- Save Position Button
+        savedPosSection:AddButton({
+            Title = "Save Current Position",
+            Content = "Save your current position for later use",
+            Callback = function()
+                local success = Teleport.savePosition()
+                if success then
+                    print("[Teleport Tab] Position saved successfully")
+                else
+                    warn("[Teleport Tab] Failed to save position")
+                end
+            end
+        })
+
+        -- Load Position Button
+        savedPosSection:AddButton({
+            Title = "Teleport to Saved Position",
+            Content = "Teleport to your saved position",
+            Callback = function()
+                local success = Teleport.toSavedPosition()
+                if success then
+                    print("[Teleport Tab] Teleported to saved position")
+                else
+                    warn("[Teleport Tab] No saved position found")
+                end
+            end
+        })
+
+        -- Clear Saved Position Button
+        savedPosSection:AddButton({
+            Title = "Clear Saved Position",
+            Content = "Delete your saved position",
+            Callback = function()
+                Teleport.clearSavedPosition()
+                print("[Teleport Tab] Saved position cleared")
+            end
+        })
+
+        -- INFO SECTION
+        local infoSection = tab:AddSection("Information")
+
+        infoSection:AddParagraph({
+            Title = "How to Use",
+            Content = [[
+    1. Select a location from dropdown
+    2. Click "Teleport to Location" to teleport
+
+    OR
+
+    1. Go to desired position in game
+    2. Click "Save Current Position"
+    3. Use "Teleport to Saved Position" anytime
+
+    Your position is saved to:
+    ZiviHub/SavedPosition_ZIVIHUB.json
+            ]]
+        })
+
+        print("[Teleport Tab] Initialized")
+    end
+
+    return TeleportTab
+
+end
+
 -- Module: ui/tabs/misc-tab
 Modules["ui/tabs/misc-tab"] = function()
     --[[
         Misc Tab Module
 
-        UI for miscellaneous features (teleport, settings).
+        UI for miscellaneous features (webhook, settings).
 
         Usage:
             local MiscTab = require("src/ui/tabs/misc-tab")
             MiscTab.setup(tab)
     ]]
 
-    local Teleport = require("src/features/teleport/teleport")
     local Webhook = require("src/network/webhook")
     local State = require("src/core/state")
 
@@ -2813,63 +2929,8 @@ Modules["ui/tabs/misc-tab"] = function()
         @param tab table - Tab object from UI library
     ]]
     function MiscTab.setup(tab)
-        -- === TELEPORT SECTION ===
-        local teleportSection = tab:AddSection("🌍 Teleportation")
-
-        -- Location Dropdown
-        local locationNames = Teleport.getLocationNames()
-
-        teleportSection:AddDropdown({
-            Title = "Teleport Location",
-            Options = locationNames,
-            Multi = false,
-            Callback = function(location)
-                if location and location ~= "" then
-                    local success = Teleport.toLocation(location)
-                    if success then
-                        print("[Misc Tab] Teleported to:", location)
-                    else
-                        warn("[Misc Tab] Teleport failed:", location)
-                    end
-                end
-            end
-        })
-
-        -- Save Position Button
-        teleportSection:AddButton({
-            Title = "Save Position",
-            Content = "Save current position",
-            Callback = function()
-                local success = Teleport.savePosition()
-                if success then
-                    print("[Misc Tab] Position saved")
-                else
-                    warn("[Misc Tab] Failed to save position")
-                end
-            end,
-            SubTitle = "Load Position",
-            SubCallback = function()
-                local success = Teleport.toSavedPosition()
-                if success then
-                    print("[Misc Tab] Teleported to saved position")
-                else
-                    warn("[Misc Tab] No saved position found")
-                end
-            end
-        })
-
-        -- Clear Saved Position Button
-        teleportSection:AddButton({
-            Title = "Clear Saved Position",
-            Content = "Delete saved position",
-            Callback = function()
-                Teleport.clearSavedPosition()
-                print("[Misc Tab] Saved position cleared")
-            end
-        })
-
-        -- === WEBHOOK SECTION ===
-        local webhookSection = tab:AddSection("📡 Discord Webhook")
+        -- WEBHOOK SECTION
+        local webhookSection = tab:AddSection("Discord Webhook")
 
         local webhookUrl = ""
 
@@ -2893,7 +2954,7 @@ Modules["ui/tabs/misc-tab"] = function()
                 if webhookUrl and webhookUrl ~= "" then
                     local success = Webhook.send(webhookUrl, {
                         embeds = {{
-                            title = "✅ Test Successful",
+                            title = "Test Successful",
                             description = "Webhook is working correctly!",
                             color = 0x00ff00,
                             timestamp = os.date("!%Y-%m-%dT%H:%M:%S")
@@ -2911,8 +2972,8 @@ Modules["ui/tabs/misc-tab"] = function()
             end
         })
 
-        -- === SETTINGS SECTION ===
-        local settingsSection = tab:AddSection("⚙️ Settings")
+        -- SETTINGS SECTION
+        local settingsSection = tab:AddSection("Settings")
 
         -- Theme Info (read-only for now)
         settingsSection:AddParagraph({
@@ -2921,22 +2982,23 @@ Modules["ui/tabs/misc-tab"] = function()
         })
 
         -- Credits
-        local creditsSection = tab:AddSection("ℹ️ Credits")
+        local creditsSection = tab:AddSection("Credits")
 
         creditsSection:AddParagraph({
             Title = "Zivi Hub",
             Content = [[
-    Version: 1.0.0 BETA
+    Version: 2.0.0 BETA
     Developer: Zivi Team
 
     Features:
-    • Instant Fishing
-    • Auto Sell
-    • Auto Favorite
-    • Teleportation
-    • Discord Webhooks
+    - Instant Fishing
+    - Auto Sell
+    - Auto Favorite
+    - Trading System
+    - Teleportation
+    - Discord Webhooks
 
-    ⚠️ Use at your own risk!
+    WARNING: Use at your own risk!
             ]]
         })
 
@@ -2963,6 +3025,7 @@ Modules["ui/main-window"] = function()
     local FishTab = require("src/ui/tabs/fish-tab")
     local AutoTab = require("src/ui/tabs/auto-tab")
     local TradeTab = require("src/ui/tabs/trade-tab")
+    local TeleportTab = require("src/ui/tabs/teleport-tab")
     local MiscTab = require("src/ui/tabs/misc-tab")
 
     local MainWindow = {}
@@ -3004,6 +3067,11 @@ Modules["ui/main-window"] = function()
             Icon = "shuffle"
         })
 
+        tabs.teleport = window:AddTab({
+            Name = "Teleport & Position",
+            Icon = "map-pin"
+        })
+
         tabs.misc = window:AddTab({
             Name = "Misc",
             Icon = "wrench"
@@ -3013,6 +3081,7 @@ Modules["ui/main-window"] = function()
         FishTab.setup(tabs.fish)
         AutoTab.setup(tabs.auto)
         TradeTab.setup(tabs.trade)
+        TeleportTab.setup(tabs.teleport)
         MiscTab.setup(tabs.misc)
 
         print("[MainWindow] All tabs initialized")
@@ -3164,30 +3233,30 @@ Modules["main"] = function()
     print("║              Version 1.0.0 BETA                  ║")
     print("╚═══════════════════════════════════════════════════╝")
     print("")
-    print("✅ Core modules loaded:")
+    print("[OK] Core modules loaded:")
     print("   - Services ✓")
     print("   - Constants ✓")
     print("   - State ✓")
     print("")
-    print("✅ Network modules loaded:")
+    print("[OK] Network modules loaded:")
     print("   - Events ✓")
     print("   - Functions ✓")
     print("   - Webhook ✓")
     print("")
-    print("✅ Utility modules loaded:")
+    print("[OK] Utility modules loaded:")
     print("   - PlayerUtils ✓")
     print("")
-    print("✅ Feature modules loaded:")
+    print("[OK] Feature modules loaded:")
     print("   - InstantFish ✓")
     print("   - AutoSell ✓")
     print("   - AutoFavorite ✓")
     print("   - Teleport ✓")
     print("")
-    print("✅ Config modules loaded:")
+    print("[OK] Config modules loaded:")
     print("   - Locations ✓")
     print("")
     print("👤 Player:", LocalPlayer.Name)
-    print("🔧 Executor: Compatible")
+    print("[INFO] Executor: Compatible")
     print("")
 
     -- ============================================
@@ -3199,7 +3268,7 @@ Modules["main"] = function()
     local uiSuccess, MainWindow = pcall(function() return require("src/ui/main-window") end)
     if not uiSuccess then
         warn("❌ Failed to load UI modules:", MainWindow)
-        warn("⚠️  UI will not be available")
+        warn("[WARNING] UI will not be available")
         MainWindow = nil
     else
         print("   ✓ MainWindow loaded")
@@ -3225,15 +3294,15 @@ Modules["main"] = function()
         end)
 
         if success then
-            print("✅ UI created successfully!")
+            print("[OK] UI created successfully!")
             print("🎨 Theme: Discord Dark Mode")
         else
             warn("❌ UI creation failed:", err)
-            print("⚠️  Features still available via console")
+            print("[WARNING] Features still available via console")
         end
     else
-        warn("⚠️  UI modules not loaded - UI unavailable")
-        print("⚠️  Features still available via console")
+        warn("[WARNING] UI modules not loaded - UI unavailable")
+        print("[WARNING] Features still available via console")
     end
 
     print("")
