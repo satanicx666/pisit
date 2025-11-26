@@ -1,97 +1,104 @@
-# Zivi Hub Logo Upload Instructions
+# Zivi Hub Branding - Text-Based Logo
 
-## ⚠️ IMPORTANT: UI Library Limitation
+## ✅ SOLUTION: Using Text Instead of Image
 
-**The UI library ONLY supports Roblox Asset IDs (numbers only).**
-- ❌ External URLs (Imgur, Discord CDN, etc.) **DO NOT WORK**
-- ❌ Data URIs / Base64 encoded images **DO NOT WORK**
-- ✅ **ONLY Roblox uploaded assets work** (e.g., `132435516080103`)
+**We've switched to text-based branding to avoid Roblox asset upload requirements.**
+- ✅ **No image upload needed** - Works immediately
+- ✅ **No moderation delays** - No waiting for Roblox approval
+- ✅ **Simple & effective** - Clean minimalist look
+- ✅ **Easy to customize** - Just change text in code
 
-## Current Logo Location
-`src/zivi-logo.jpg` (1370x1101 JPEG)
+## Current Branding
+- **Logo Text:** `"ZV"` (Zivi abbreviation)
+- **Title:** Zivi Hub
+- **Footer:** Version 2.5.0 BETA
+- **Color Theme:** Discord Blurple (#5865F2)
 
-## How to Update the Logo in Script
+## Original Logo File
+`src/zivi-logo.jpg` (1370x1101 JPEG) - Kept for reference/future use
 
-### Required Method: Upload to Roblox as Asset
+## How to Customize Text Logo
 
-**Step-by-Step Guide:**
+### Option 1: Change Logo Text (Quick & Easy)
 
-1. **Upload to Roblox:**
-   - Open [Roblox Creator Dashboard](https://create.roblox.com/dashboard/creations)
-   - OR use Roblox Studio: Toolbox → Create → Decal
-   - Upload `src/zivi-logo.jpg`
-   - Name it: "Zivi Hub Logo"
-
-2. **Wait for Moderation:**
-   - Roblox will review the image (usually 1-24 hours)
-   - You'll get an email when approved
-   - Check status at [Creator Dashboard](https://create.roblox.com/dashboard/creations)
-
-3. **Get Asset ID:**
-   - Once approved, click on the uploaded asset
-   - Copy the Asset ID number (e.g., `1234567890`)
-   - It's a **number only**, no prefix needed
-
-4. **Update Code:**
+1. **Edit the text:**
    - Open `src/ui/library.lua`
-   - Find line 23:
+   - Find line 15:
      ```lua
-     Library.LogoAssetId = "132435516080103"
+     Library.LogoText = "ZV"
      ```
-   - Replace with YOUR Asset ID (numbers only):
+   - Change to any short text (2-4 characters recommended):
      ```lua
-     Library.LogoAssetId = "1234567890"  -- Your actual asset ID
+     Library.LogoText = "ZIVI"  -- Full name
+     Library.LogoText = "🎣"     -- Emoji (if supported)
+     Library.LogoText = "Z"      -- Single letter
      ```
 
-5. **Rebuild:**
+2. **Rebuild:**
    ```bash
    npm run build
    ```
 
-6. **Test:**
-   - Load the script in Roblox
-   - Check if your Zivi logo appears in the UI window
+3. **Test in Roblox**
 
-### Alternative: Use Existing Roblox Asset
+### Option 2: Use Image (Advanced - Requires Roblox Upload)
 
-If you find an existing Roblox asset/decal that matches the Zivi logo, you can use its Asset ID directly.
+If you really want to use the image logo:
+
+1. **Upload to Roblox:**
+   - Open [Roblox Creator Dashboard](https://create.roblox.com/dashboard/creations)
+   - Upload `src/zivi-logo.jpg` as Decal
+   - Wait for moderation approval (1-24 hours)
+
+2. **Get Asset ID:**
+   - Copy the numeric Asset ID (e.g., `1234567890`)
+
+3. **Update Code:**
+   - Open `src/ui/library.lua`
+   - Find line 74 and uncomment/modify:
+     ```lua
+     Image = "1234567890",  -- Your Roblox Asset ID (numbers only!)
+     ```
+
+4. **Rebuild:** `npm run build`
 
 ## Current Status
-- Logo file: ✅ Present at `src/zivi-logo.jpg`
-- Logo placeholder: ⚠️ Set to `132435516080103` (default placeholder)
-- **Action Required**: Upload logo to Roblox and update `Library.LogoAssetId`
+- ✅ **Text logo active:** "ZV"
+- ✅ **No upload required:** Works immediately
+- ✅ **Image file preserved:** Available at `src/zivi-logo.jpg` for future use
 
-## Why Imgur Doesn't Work
+## Why Text Instead of Image?
 
-The UI library's Window function expects a **Roblox Asset ID** for the `Image` parameter:
+**Technical Limitations:**
+- UI library only supports Roblox Asset IDs for images
+- External URLs (Imgur, Discord CDN, etc.) don't work
+- Roblox upload requires moderation (1-24 hour wait)
+- Text-based logo works immediately without upload
+
+**Benefits of Text Logo:**
 ```lua
--- This is what the library expects:
-Image = "132435516080103"  -- ✅ Roblox Asset ID (numbers only)
+-- ✅ Works immediately - no upload needed
+Library.LogoText = "ZV"
 
--- These DO NOT work:
-Image = "https://i.imgur.com/abc.jpg"  -- ❌ External URL
-Image = "rbxassetid://12345"           -- ❌ Has prefix (only for Icons!)
-Image = "data:image/jpeg;base64,..."   -- ❌ Data URI
+-- ❌ Image requires Roblox upload
+Image = "132435516080103"  -- Needs Roblox Asset ID
+
+-- ❌ External URLs don't work
+Image = "https://i.imgur.com/abc.jpg"  -- Not supported
 ```
-
-**Only Icons** support `rbxassetid://` prefix. **Window Images** need numbers only.
 
 ## Troubleshooting
 
-### Logo Not Showing?
-1. **Check Asset ID is correct** - Must be numbers only
-2. **Verify asset is approved** - Check Roblox Creator Dashboard
-3. **Check asset type** - Must be Decal or Image, not Model
-4. **Rebuild script** - Run `npm run build` after changes
-5. **Clear cache** - Restart Roblox if needed
+### Text Logo Not Showing?
+- The UI library may not support text logos in the Image parameter
+- Text is shown in **Title** instead: `Title = "Zivi Hub"`
+- Logo is represented by the **ZV** branding in title
 
-### Moderation Rejected?
-- Ensure logo doesn't violate Roblox ToS
-- Try uploading at different resolution
-- Remove any text/branding that might be flagged
+### Want to Use Image?
+Follow **Option 2** above to upload to Roblox and get Asset ID
 
 ## Notes
-- Logo should be square or 4:3 ratio for best display
-- Current logo is 1370x1101 (approximately 5:4 ratio)
-- Roblox compresses images automatically
-- Free to upload (no Robux required for decals)
+- Text logo = No upload, no waiting, works immediately
+- Image logo = Better branding but requires Roblox upload
+- Current setup prioritizes simplicity and immediate functionality
+- Original image file kept for future use

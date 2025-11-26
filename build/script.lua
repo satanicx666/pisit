@@ -2,7 +2,7 @@
     ╔═══════════════════════════════════════════════════╗
     ║          Roblox FishIt Script - Bundled          ║
     ║                                                   ║
-    ║  Build Date: 2025-11-26 11:11:11                        ║
+    ║  Build Date: 2025-11-26 11:14:18                        ║
     ║  Version: 2.0.0                              ║
     ║                                                   ║
     ║  ⚠️  FOR EDUCATIONAL PURPOSES ONLY               ║
@@ -1490,17 +1490,9 @@ Modules["ui/library"] = function()
     
     local Library = {}
     
-    -- Zivi Hub Logo Asset ID
-    -- IMPORTANT: This UI library ONLY supports Roblox Asset IDs (numbers only)
-    -- External URLs (Imgur, etc.) are NOT supported!
-    --
-    -- To update logo:
-    -- 1. Upload src/zivi-logo.jpg to Roblox as a Decal/Image asset
-    -- 2. Wait for moderation approval (usually 1-24 hours)
-    -- 3. Get the Asset ID number (e.g., 1234567890)
-    -- 4. Replace Library.LogoAssetId below with just the number
-    -- 5. Rebuild: npm run build
-    Library.LogoAssetId = "132435516080103"  -- Placeholder - Replace with your Roblox Asset ID (numbers only!)
+    -- Zivi Hub Branding
+    -- Using text-based logo instead of image to avoid Roblox asset requirements
+    Library.LogoText = "ZV"  -- Text shown in window (can be changed to any short text)
     
     -- Discord Dark Theme Colors
     Library.Theme = {
@@ -1555,10 +1547,11 @@ Modules["ui/library"] = function()
         end
     
         -- Create window with Discord dark theme
+        -- Note: Image parameter removed - using text-based branding instead
         local window = lib:Window({
             Title = "Zivi Hub",
             Footer = "Version 2.5.0 BETA",
-            Image = Library.LogoAssetId,  -- Zivi Hub logo
+            -- Image = Library.LogoText,  -- Optional: Some UI libraries support text logos
             Color = Library.Theme.Primary,  -- Discord blurple
             Theme = 9542022979,
             Version = 3
