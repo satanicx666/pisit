@@ -96,6 +96,22 @@ local State = {
     disabledCons = {},
     CEvent = true,
 
+    -- Webhook
+    webhook = {
+        url = "",
+        enabled = false,
+        hideIdentifier = false,
+        discordMention = "",
+        selectedRarities = {
+            Uncommon = false,
+            Rare = false,
+            Epic = false,
+            Legendary = false,
+            Mythic = true,
+            Secret = true
+        }
+    },
+
     -- Misc
     lcc = 0,
     lastState = nil

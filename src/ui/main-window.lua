@@ -13,6 +13,7 @@ local FishTab = require("src/ui/tabs/fish-tab")
 local AutoTab = require("src/ui/tabs/auto-tab")
 local TradeTab = require("src/ui/tabs/trade-tab")
 local TeleportTab = require("src/ui/tabs/teleport-tab")
+local WebhookTab = require("src/ui/tabs/webhook-tab")
 local MiscTab = require("src/ui/tabs/misc-tab")
 
 local MainWindow = {}
@@ -59,6 +60,11 @@ function MainWindow.create()
         Icon = "map-pin"
     })
 
+    tabs.webhook = window:AddTab({
+        Name = "Webhook",
+        Icon = "bell"
+    })
+
     tabs.misc = window:AddTab({
         Name = "Misc",
         Icon = "wrench"
@@ -69,6 +75,7 @@ function MainWindow.create()
     AutoTab.setup(tabs.auto)
     TradeTab.setup(tabs.trade)
     TeleportTab.setup(tabs.teleport)
+    WebhookTab.setup(tabs.webhook)
     MiscTab.setup(tabs.misc)
 
     print("[MainWindow] All tabs initialized")
