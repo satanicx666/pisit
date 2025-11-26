@@ -35,3 +35,4 @@ npm-debug.log*
 # Config files (may contain sensitive data)
 config/*.json
 !config/default-config.lua
+.claude

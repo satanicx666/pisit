@@ -2,7 +2,7 @@
     ╔═══════════════════════════════════════════════════╗
     ║          Roblox FishIt Script - Bundled          ║
     ║                                                   ║
-    ║  Build Date: 2025-11-26 10:58:14                        ║
+    ║  Build Date: 2025-11-26 11:01:02                        ║
     ║  Version: 2.0.0                              ║
     ║                                                   ║
     ║  ⚠️  FOR EDUCATIONAL PURPOSES ONLY               ║
@@ -1496,7 +1496,7 @@ Modules["ui/library"] = function()
     -- 2. Get the direct image URL
     -- 3. OR upload to Roblox as a Decal asset and get the rbxassetid
     -- 4. Replace the Image value in createWindow() function
-    Library.LogoAssetId = "132435516080103"  -- Default placeholder, replace with actual Zivi logo asset ID
+    Library.LogoAssetId = "https://i.imgur.com/nJCHNVK.jpeg"  -- Default placeholder, replace with actual Zivi logo asset ID
     
     -- Discord Dark Theme Colors
     Library.Theme = {
